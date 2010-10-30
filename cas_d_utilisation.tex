@@ -1,0 +1,322 @@
+\documentclass[a4paper]{article}
+
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\ifpdf
+\usepackage[pdftex=true,hyperindex=true,colorlinks=true]{hyperref}
+\else
+\usepackage[hypertex=true,hyperindex=true,colorlinks=false]{hyperref}
+\fi
+
+\newcommand{\cutitle}[4]{
+\newpage
+\section{#2}
+\noindent Nom du projet : #1 \hfill Version #3\\
+Spécification du cas d'utilisation : #2 \hfill Date : #4
+}
+\newcommand{\cutitleshort}[3]{\cutitle{Bureau d'étude 2010/2011}{#1}{#2}{#3}}
+\newcommand{\cupresentation}[5]{
+\subsection{Présentation}
+Acteur initiateur : #1\par
+But du cas : #2\par
+Préconditions : #3\par
+Postconditions : #4\par
+Cas d'utilisation inclus : #5
+}
+\newcommand{\cuscenario}{\subsection{Scénario principal aboutissant au succès}}
+\newcommand{\cuscensys}{\hspace{1cm}}
+\newcommand{\cualternat}{\subsection{Alternatives}}
+\newcommand{\cubesoinsnf}[3]{
+\subsection{Besoins non fonctionnels}
+A. Fréquence : #1\par
+B. Fiabilité : #2\par
+C. Performance : #3
+}
+\newcommand{\cureglesg}{\subsection{Règles de gestion}}
+\newcommand{\cutodol}{\subsection{Points ouverts}}
+
+\title{Projet de bureau d'étude : jeu de poker multijoueur\\Cas d'utilisation}
+\author{
+	Florian \textsc{Canezin},\\
+	Matthieu \textsc{Dubet},\\
+	Marius \textsc{Moulis},\\
+	Régis \textsc{Spadotti},\\
+	Guillaume \textsc{Verdier}
+}
+\date{}
+
+\begin{document}
+
+\maketitle
+\clearpage
+
+\tableofcontents
+
+\cutitleshort{CreerPartie}{0.0}{20/10/10}
+
+\cupresentation{Utilisateur}
+{ouverture d'une table de jeu selon les paramètres définis (voir spécificiation).}
+{aucune.}
+{en attente des connexions d'un nombre défini de joueurs.}
+{aucun.}
+
+\cuscenario
+
+1. L'utilisateur demande la création d'une table de jeu
+
+\cuscensys 2. Le système demande le nombre de joueurs pour commencer la partie
+
+3. L'utilisateur donne le nombre de joueurs
+
+\cuscensys 4. Le système vérifie la validité de la valeur saisie et demande le temps d'action ainsi que le temps d'action supplémentaire
+
+5. L'utilisateur fournit ces deux données
+
+\cuscensys 6. Le système vérifie la validité des valeurs saisies et demande la durée entre les augmentations de SB et BB ainsi que le montant de celles-ci
+
+7. L'utilisateur fournit ces deux données
+
+\cuscensys 8. Le système vérifie la validité ces données et crée la partie
+
+\cualternat
+
+Échec <paramètre i> : à l'étape <2i+2>, si la validation du <paramètre i> échoue
+
+\cuscensys A.1 GOTO étape <2i>
+
+\cubesoinsnf{}{}{}
+
+\cureglesg
+
+Les paramètres doivent être valides (cf la spécification).
+
+\cutodol
+
+\cutitleshort{RejoindrePartie}{0.0}{20/10/10}
+
+\cupresentation{Utilisateur}
+{accèder à une table de jeu de manière à pouvoir jouer, mais sans interrompre une main en cours, donc en devenant spectateur.}
+{aucune.}
+{\begin{itemize}
+	\item spectateur
+	\item en attente de fin de main pour pouvoir postuler pour devenir joueur si une place est libre
+\end{itemize}}
+{aucun.}
+
+\cuscenario
+
+1. L'utilisateur demande l'accès à une table de jeu
+
+\cuscensys 2. Le système vérifie l'existence de la table de jeu et rejoins cette table
+
+\cualternat
+
+Erreur table : à l'étape 2, si la vérification de la table échoue
+
+\cuscensys A.1 l'utilisateur est averti de la non existence de la table et GOTO 1
+
+\cubesoinsnf{}{}{}
+
+\cureglesg
+
+Validité de la table (cf la spécification).
+
+\cutodol
+
+\cutitleshort{DemanderDevenirJoueur}{0.0}{20/10/10}
+
+\cupresentation{Spectateur}
+{accéder à la table de jeu en tant que joueur, et pouvoir participer à la partie en cours.}
+{\begin{itemize}
+	\item être spectateur d'une table de jeu ouverte
+	\item la main en cours doit être finie
+\end{itemize}}
+{joueur.}
+{aucun.}
+
+\cuscenario
+
+1. L'utilisateur demande à devenir joueur
+
+\cuscensys 2. Le système vérifie le droit de jeu et devient joueur
+
+\cualternat
+
+Impossible Joueur : à l'etape 2, si la vérification du droit de jeu échoue
+
+\cuscensys A.1 Le système prévient l'acteur et celui-ci reste spectateur
+
+\cubesoinsnf{}{}{}
+
+\cureglesg
+
+Vérification droit de jeu
+
+\cutodol
+
+\cutitleshort{QuitterPartie}{0.0}{20/10/10}
+
+\cupresentation{Spectateur ou Joueur}
+{se déconnecter volontairement d'une table de jeu.}
+{avoir rejoint cette table.}
+{état initial du systeme.}
+{aucun.}
+
+\cuscenario
+
+1. L'acteur demande à être déconnecté de la table
+
+\cuscensys 2. Le système revient à son etat initial
+
+\cualternat
+
+\cubesoinsnf{}{}{}
+
+\cureglesg
+
+\cutodol
+
+\cutitleshort{EnvoyerMessage}{0.0}{20/10/10}
+
+\cupresentation{Spectateur ou Joueur}
+{communiquer avec d'autres joueurs/spectateurs par des messages textuels.}
+{avoir rejoint une table.}
+{aucune.}
+{aucun.}
+
+\cuscenario
+
+1. L'utilisateur demande le post d'un message dans le chat
+
+\cuscensys 2. Le système envoie le message aux autres joueurs/spectateurs et l'affiche dans le chat
+
+\cualternat
+
+\cubesoinsnf{}{}{}
+
+\cureglesg
+
+\cutodol
+
+\cutitleshort{DevenirSpectateur}{0.0}{20/10/10}
+\cupresentation{Joueur}
+{arrêter de jouer à la table mais observer le déroulement de la partie en cours.}
+{avoir rejoint la table.}
+{spectateur.}
+{}
+
+\cuscenario
+
+1. L'utilisateur demande à être spectateur
+
+\cuscensys 2. Le système annonce devenir Spectateur et le devient
+
+\cualternat
+
+\cubesoinsnf{}{}{}
+
+\cureglesg
+
+\cutodol
+
+\cutitleshort{SeCoucher}{0.0}{20/10/10}
+
+\cupresentation{Joueur}
+{arrêter de jouer pour la main en cours.}
+{être en train de jouer une main.}
+{en attente de la fin de la main courante.}
+{}
+
+\cuscenario
+
+1. L'utilisateur demande à se coucher
+
+\cuscensys 2. Le système annonce se coucher et attend la fin de la main en cours
+
+\cualternat
+
+\cubesoinsnf{}{}{}
+
+\cureglesg
+
+\cutodol
+
+\cutitleshort{Suivre}{0.0}{20/10/10}
+
+\cupresentation{Joueur}
+{égaliser la mise minimale de participation à la suite de la main en cours.}
+{être en train de jouer une main.}
+{en attente du nouveau tour de mise (suivant ou courant à égaliser).}
+{}
+
+\cuscenario
+
+1. L'utilisateur annonce qu'il suit la mise actuelle
+
+\cuscensys 2. Le système vérifie que la somme est valide, fait état de l'action et attend le prochaine tour de parole
+
+\cualternat
+
+ERREUR mise : à l'étape 2, si la somme n'est pas valide
+
+\cuscensys A.1 Le système annonce qu'il est tapis.
+
+\cubesoinsnf{}{}{}
+
+\cureglesg 
+
+Validation mise
+
+\cutodol
+
+\cutitleshort{Relancer}{0.0}{20/10/10}
+
+\cupresentation{Joueur}
+{augmenter la mise minimale de participation à la suite de la main en cours.}
+{être en train de jouer une main.}
+{en attente du nouveau tour de mise (suivant ou courant à égaliser).}
+{}
+
+\cuscenario
+
+1. L'utilisateur demande à relancer d'une certaine somme
+
+\cuscensys 2. Le système vérifie que la somme est valide, fait état de la relance et attend le prochaine tour de parole
+
+\cualternat
+
+ERREUR mise : à l'étape 2, si la somme n'est pas valide
+
+\cuscensys A.1 Le système l'annonce au joueur et GOTO 1.
+
+\cubesoinsnf{}{}{}
+
+\cureglesg 
+
+Validation mise
+
+\cutodol
+
+\cutitleshort{ConsulterStatistiques}{0.0}{20/10/10}
+
+\cupresentation{Joueur}
+{obtenir ses propres statistiques ainsi que celles des joueurs jouant à la table.}
+{aucune.}
+{aucune.}
+{aucun.}
+
+\cuscenario
+
+1. L'utilisateur demande l'obtention des statistiques d'un joueur (peut-être lui-même)
+
+\cuscensys 2. Le système lui fournit ces informations
+
+\cualternat
+
+\cubesoinsnf{}{}{}
+
+\cutodol
+
+\end{document}
