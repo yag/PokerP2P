@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article}
+	\documentclass[a4paper]{article}
 
 \usepackage[francais]{babel}
 \usepackage[T1]{fontenc}
@@ -57,7 +57,7 @@ C. Performance : #3
 \cutitleshort{CreerPartie}{0.0}{20/10/10}
 
 \cupresentation{Utilisateur}
-{ouverture d'une table de jeu selon les paramètres définis (voir spécificiation).}
+{ouverture d'une table de jeu selon les paramètres définis (cf règles de gestion).}
 {aucune.}
 {en attente des connexions d'un nombre défini de joueurs.}
 {aucun.}
@@ -90,7 +90,11 @@ C. Performance : #3
 
 \cureglesg
 
-Les paramètres doivent être valides (cf la spécification).
+Les paramètres doivent être valides  :
+	* temps de decision entre 0 et 15 secondes.
+	* nombre de joueurs maximum à la table compris entre 2 à 8
+	* SB,BB de départ
+	FIXME(* modalités de changement de SB/BB : par défaut , double à chaque tour de table.?)
 
 \cutodol
 
@@ -121,17 +125,18 @@ Erreur table : à l'étape 2, si la vérification de la table échoue
 
 \cureglesg
 
-Validité de la table (cf la spécification).
+FIXME (çà me semble plutot correspondre à creerPartie)
+Validité de la table (cf la spécification).)
 
 \cutodol
 
 \cutitleshort{DemanderDevenirJoueur}{0.0}{20/10/10}
 
 \cupresentation{Spectateur}
-{accéder à la table de jeu en tant que joueur, et pouvoir participer à la partie en cours.}
+{passer du statut de spectateur à celui de joueur au sein de la table de jeu actuelle, et pouvoir participer à la partie en cours.}
 {\begin{itemize}
 	\item être spectateur d'une table de jeu ouverte
-	\item la main en cours doit être finie
+	\item il n'y a pas de main en cours
 \end{itemize}}
 {joueur.}
 {aucun.}
@@ -140,7 +145,7 @@ Validité de la table (cf la spécification).
 
 1. L'utilisateur demande à devenir joueur
 
-\cuscensys 2. Le système vérifie le droit de jeu et devient joueur
+\cuscensys 2. Le système vérifie le droit de jeu et l'utilisateur devient joueur
 
 \cualternat
 
@@ -152,7 +157,8 @@ Impossible Joueur : à l'etape 2, si la vérification du droit de jeu échoue
 
 \cureglesg
 
-Vérification droit de jeu
+Vérification droit de jeu 
+FIXME Verifier que le joueur n'a pas été précédemment banni
 
 \cutodol
 
@@ -181,7 +187,7 @@ Vérification droit de jeu
 \cutitleshort{EnvoyerMessage}{0.0}{20/10/10}
 
 \cupresentation{Spectateur ou Joueur}
-{communiquer avec d'autres joueurs/spectateurs par des messages textuels.}
+{communiquer avec d'autres joueurs/spectateurs de la table par des messages textuels.}
 {avoir rejoint une table.}
 {aucune.}
 {aucun.}
@@ -198,12 +204,15 @@ Vérification droit de jeu
 
 \cureglesg
 
+FIXME : Verifier que l'utilisateur a le droit d'envoyer ce message selon certains règles:
+	* pas plus de 3 messages d'affilés ET en moins de 1 minutes
+
 \cutodol
 
 \cutitleshort{DevenirSpectateur}{0.0}{20/10/10}
 \cupresentation{Joueur}
 {arrêter de jouer à la table mais observer le déroulement de la partie en cours.}
-{avoir rejoint la table.}
+{avoir rejoint la table. etre joueur de cette table}
 {spectateur.}
 {}
 
@@ -219,6 +228,8 @@ Vérification droit de jeu
 
 \cureglesg
 
+FIXME : Si la demande a lieu au cours d'une main, demander une confirmation à l'utilisateur
+(pour eviter de se coucher involontairement)
 \cutodol
 
 \cutitleshort{SeCoucher}{0.0}{20/10/10}
@@ -246,7 +257,7 @@ Vérification droit de jeu
 \cutitleshort{Suivre}{0.0}{20/10/10}
 
 \cupresentation{Joueur}
-{égaliser la mise minimale de participation à la suite de la main en cours.}
+{égaliser la mise maximale actuelle au cours d'une main.}
 {être en train de jouer une main.}
 {en attente du nouveau tour de mise (suivant ou courant à égaliser).}
 {}
@@ -267,14 +278,14 @@ ERREUR mise : à l'étape 2, si la somme n'est pas valide
 
 \cureglesg 
 
-Validation mise
+Le joueur possede l'argent qu'il mise.
 
 \cutodol
 
 \cutitleshort{Relancer}{0.0}{20/10/10}
 
 \cupresentation{Joueur}
-{augmenter la mise minimale de participation à la suite de la main en cours.}
+{augmenter la mise maximale actuelle au cours d'une main.}
 {être en train de jouer une main.}
 {en attente du nouveau tour de mise (suivant ou courant à égaliser).}
 {}
@@ -283,7 +294,7 @@ Validation mise
 
 1. L'utilisateur demande à relancer d'une certaine somme
 
-\cuscensys 2. Le système vérifie que la somme est valide, fait état de la relance et attend le prochaine tour de parole
+\cuscensys 2. Le système vérifie que la somme est valide, fait état de la relance et attend le prochain tour de parole
 
 \cualternat
 
@@ -295,7 +306,38 @@ ERREUR mise : à l'étape 2, si la somme n'est pas valide
 
 \cureglesg 
 
-Validation mise
+Validation de la mise :
+* le joueur possede l'argent qu'il mise
+* la somme est un multiple de la blind
+* la somme est un multiple de la précédente mise
+
+\cutodol
+
+\cutitleshort{FaireTapis}{0.0}{20/10/10}
+
+\cupresentation{Joueur}
+{egaliser ou augmenter la mise maximale actuelle en jouant tout son argent}
+{être en train de jouer une main.}
+{suivant le resultat de la main, devenir spectateur ou rester joueur.}
+{}
+
+\cuscenario
+
+1. L'utilisateur demande à faire tapis 
+
+\cuscensys 2. Le système fait état du tapis et attend le prochain tour de parole
+
+\cualternat
+
+ERREUR mise : à l'étape 2, si la somme n'est pas valide
+
+\cuscensys A.1 Le système l'annonce au joueur et GOTO 1.
+
+\cubesoinsnf{}{}{}
+
+\cureglesg 
+
+Separation des pots
 
 \cutodol
 
