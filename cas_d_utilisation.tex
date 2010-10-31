@@ -66,35 +66,32 @@ C. Performance : #3
 
 1. L'utilisateur demande la création d'une table de jeu
 
-\cuscensys 2. Le système demande le nombre de joueurs pour commencer la partie
+\cuscensys 2. Le système demande les paramètres (cf règles de gestion)
 
-3. L'utilisateur donne le nombre de joueurs
+3. L'utilisateur fournit les paramètres
 
-\cuscensys 4. Le système vérifie la validité de la valeur saisie et demande le temps d'action ainsi que le temps d'action supplémentaire
-
-5. L'utilisateur fournit ces deux données
-
-\cuscensys 6. Le système vérifie la validité des valeurs saisies et demande la durée entre les augmentations de SB et BB ainsi que le montant de celles-ci
-
-7. L'utilisateur fournit ces deux données
-
-\cuscensys 8. Le système vérifie la validité ces données et crée la partie
+\cuscensys 4. Le système vérifie la validité de ces données et crée la partie
 
 \cualternat
 
-Échec <paramètre i> : à l'étape <2i+2>, si la validation du <paramètre i> échoue
+Échec vérification : à l'étape 4, si la validation d'un des paramètres échoue
 
-\cuscensys A.1 GOTO étape <2i>
+\cuscensys A.1 GOTO étape 3
 
 \cubesoinsnf{}{}{}
 
 \cureglesg
 
 Les paramètres doivent être valides  :
-	* temps de decision entre 0 et 15 secondes.
-	* nombre de joueurs maximum à la table compris entre 2 à 8
-	* SB,BB de départ
-	FIXME(* modalités de changement de SB/BB : par défaut , double à chaque tour de table.?)
+\begin{itemize}
+	\item la cave initiales, à partir de 10\$, sans limite
+	\item temps de décision entre 1 et 15 secondes
+	\item nombre de joueurs requis pour commencer à jouer, entre 2 et 8
+	\item nombre de joueurs maximum à la table, entre 2 à 8
+	\item SB et BB de départ
+	\item temps entre les blind-up (au moins une minute, sans limite)
+	\item schéma d'augmentation des SB, BB et Ante
+\end{itemize}
 
 \cutodol
 
@@ -113,20 +110,21 @@ Les paramètres doivent être valides  :
 
 1. L'utilisateur demande l'accès à une table de jeu
 
-\cuscensys 2. Le système vérifie l'existence de la table de jeu et rejoins cette table
+\cuscensys 2. Le système vérifie l'existence de la table de jeu et rejoint cette table
 
 \cualternat
 
-Erreur table : à l'étape 2, si la vérification de la table échoue
+Erreur table : à l'étape 2, si la table n'existe pas
 
-\cuscensys A.1 l'utilisateur est averti de la non existence de la table et GOTO 1
+\cuscensys A.1 L'utilisateur est averti de la non existence de la table et GOTO 1
+
+Erreur banni : à l'étape 2, si le serveur refuse la connexion car le joueur a été banni
+
+\cuscensys B.1 L'utilisateur est averti et GOTO 1
 
 \cubesoinsnf{}{}{}
 
 \cureglesg
-
-FIXME (çà me semble plutot correspondre à creerPartie)
-Validité de la table (cf la spécification).)
 
 \cutodol
 
@@ -145,11 +143,11 @@ Validité de la table (cf la spécification).)
 
 1. L'utilisateur demande à devenir joueur
 
-\cuscensys 2. Le système vérifie le droit de jeu et l'utilisateur devient joueur
+\cuscensys 2. Le système demande au serveur l'autorisation et l'utilisateur devient joueur
 
 \cualternat
 
-Impossible Joueur : à l'etape 2, si la vérification du droit de jeu échoue
+Impossible Joueur : à l'etape 2, si le serveur refuse que le spectateur devienne joueur
 
 \cuscensys A.1 Le système prévient l'acteur et celui-ci reste spectateur
 
@@ -157,8 +155,11 @@ Impossible Joueur : à l'etape 2, si la vérification du droit de jeu échoue
 
 \cureglesg
 
-Vérification droit de jeu 
-FIXME Verifier que le joueur n'a pas été précédemment banni
+Le spectateur peut ne pas pouvoir devenir joueur pour plusieurs raisons :
+\begin{itemize}
+	\item il n'y a pas de place
+	\item d'autres spectateurs ont demandé à devenir joueurs avant lui
+\end{itemize}
 
 \cutodol
 
@@ -166,7 +167,10 @@ FIXME Verifier que le joueur n'a pas été précédemment banni
 
 \cupresentation{Spectateur ou Joueur}
 {se déconnecter volontairement d'une table de jeu.}
-{avoir rejoint cette table.}
+{\begin{itemize}
+	\item avoir rejoint cette table
+	\item si l'acteur initiateur est un joueur, qu'il n'y ait pas de main en cours
+\end{itemize}}
 {état initial du systeme.}
 {aucun.}
 
@@ -177,6 +181,10 @@ FIXME Verifier que le joueur n'a pas été précédemment banni
 \cuscensys 2. Le système revient à son etat initial
 
 \cualternat
+
+Erreur Main : à l'étape 2, si une main est en cours et que l'acteur initiateur y joue
+
+\cuscensys A.1 Le système indique au joueur qu'il lui faut attendre la fin de la main
 
 \cubesoinsnf{}{}{}
 
@@ -196,23 +204,36 @@ FIXME Verifier que le joueur n'a pas été précédemment banni
 
 1. L'utilisateur demande le post d'un message dans le chat
 
-\cuscensys 2. Le système envoie le message aux autres joueurs/spectateurs et l'affiche dans le chat
+\cuscensys 2. Le système envoie le message au serveur et l'affiche dans le chat
 
 \cualternat
+
+À l'étape 2, si l'utilisateur n'a pas le droit de poster le message
+
+\cuscensys A.1 Le système l'en informe et n'envoie pas le message
 
 \cubesoinsnf{}{}{}
 
 \cureglesg
 
-FIXME : Verifier que l'utilisateur a le droit d'envoyer ce message selon certains règles:
-	* pas plus de 3 messages d'affilés ET en moins de 1 minutes
+L'utilisateur peut ne pas avoir le droit de poster de message si :
+\begin{itemize}
+	\item il a déjà posté 3 messages d'affilée
+	\item il a déjà posté 3 messages en moins d'une minute
+	\item le message contient certains mots interdits (injures, par exemple)
+\end{itemize}
 
 \cutodol
 
 \cutitleshort{DevenirSpectateur}{0.0}{20/10/10}
 \cupresentation{Joueur}
 {arrêter de jouer à la table mais observer le déroulement de la partie en cours.}
-{avoir rejoint la table. etre joueur de cette table}
+{\begin{itemize}
+	\item avoir rejoint une table
+	\item être joueur à cette table
+	\item qu'il n'y a pas une main en cours
+	\item qu'il y ait au moins 2 autres joueurs à la table
+\end{itemize}}
 {spectateur.}
 {}
 
@@ -220,7 +241,7 @@ FIXME : Verifier que l'utilisateur a le droit d'envoyer ce message selon certain
 
 1. L'utilisateur demande à être spectateur
 
-\cuscensys 2. Le système annonce devenir Spectateur et le devient
+\cuscensys 2. Le système annonce devenir spectateur et le devient
 
 \cualternat
 
@@ -228,8 +249,6 @@ FIXME : Verifier que l'utilisateur a le droit d'envoyer ce message selon certain
 
 \cureglesg
 
-FIXME : Si la demande a lieu au cours d'une main, demander une confirmation à l'utilisateur
-(pour eviter de se coucher involontairement)
 \cutodol
 
 \cutitleshort{SeCoucher}{0.0}{20/10/10}
@@ -278,7 +297,7 @@ ERREUR mise : à l'étape 2, si la somme n'est pas valide
 
 \cureglesg 
 
-Le joueur possede l'argent qu'il mise.
+Le joueur possède l'argent qu'il mise.
 
 \cutodol
 
@@ -307,18 +326,20 @@ ERREUR mise : à l'étape 2, si la somme n'est pas valide
 \cureglesg 
 
 Validation de la mise :
-* le joueur possede l'argent qu'il mise
-* la somme est un multiple de la blind
-* la somme est un multiple de la précédente mise
+\begin{itemize}
+	\item le joueur possède l'argent qu'il mise
+	\item la somme est un multiple de la blind
+	\item la somme est un multiple de la précédente mise
+\end{itemize}
 
 \cutodol
 
 \cutitleshort{FaireTapis}{0.0}{20/10/10}
 
 \cupresentation{Joueur}
-{egaliser ou augmenter la mise maximale actuelle en jouant tout son argent}
+{égaliser ou augmenter la mise maximale actuelle en jouant tout son argent.}
 {être en train de jouer une main.}
-{suivant le resultat de la main, devenir spectateur ou rester joueur.}
+{suivant le résultat de la main, devenir spectateur ou rester joueur.}
 {}
 
 \cuscenario
@@ -337,7 +358,7 @@ ERREUR mise : à l'étape 2, si la somme n'est pas valide
 
 \cureglesg 
 
-Separation des pots
+Séparation des pots
 
 \cutodol
 

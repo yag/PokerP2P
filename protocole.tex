@@ -1,0 +1,172 @@
+\documentclass[a4paper]{article}
+
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\ifpdf
+\usepackage[pdftex=true,hyperindex=true,colorlinks=true]{hyperref}
+\else
+\usepackage[hypertex=true,hyperindex=true,colorlinks=false]{hyperref}
+\fi
+
+\newcommand{\mailto}[1]{<\href{mailto:#1}{#1}>}
+
+\title{Projet de bureau d'étude : jeu de poker multijoueur\\Protocole de communication}
+\author{
+	Florian \textsc{Canezin},\\
+	Matthieu \textsc{Dubet},\\
+	Marius \textsc{Moulis},\\
+	Régis \textsc{Spadotti},\\
+	Guillaume \textsc{Verdier}
+}
+\date{}
+
+\begin{document}
+
+\maketitle
+\clearpage
+
+\tableofcontents
+\clearpage
+
+\section{Introduction}
+
+\subsection{Approches}
+
+Les échanges entre clients se font sur en pair-à-pair décentralisé.
+
+Il y a du coup deux approches pour gérer les communications.
+
+La première consiste à rétablir un protocole de type client/serveur, où un des joueurs fait office de serveur tandis que les autres se comportent comme des clients basiques.
+
+La seconde approche consiste à conserver une approche totalement décentralisée, où chaque joueur envoie toutes les informations aux autres joueurs, et où ils se mettent mutuellement d'accord pour les décisions importantes (comme le bannissement pour triche).
+
+Nous avions commencé à travailler sur cette seconde méthode (le protocole était d'ailleurs établi, et fonctionnait sur les petits tests que nous avions effectués), mais nous nous sommes trouvés confrontés à plusieurs problèmes, notamment le fait que certaines personnes le considéraient trop complexe à implémenter et que nous n'avons pas eu le temps de trouver de «~protocole~» Java convenant (RMI s'est révélé inadapté, les sockets de base de trop bas niveau, ...).
+
+Aussi, afin de s'assurer que les différents groupes puissent implémenter le protocole sans difficulté, nous sommes revenus à la première approche.
+
+\section{Création de partie et connexion}
+
+Un client crée la partie et spécifie les paramètres, notamment :
+\begin{itemize}
+	\item le nombre de joueurs pour commencer la partie
+	\item le temps de réflexion (le temps qu'a un joueur pour jouer)
+	\item le temps entre les blind-up
+	\item la cave initiale
+	\item le schéma d'augmentation des SB, BB et Ante.
+\end{itemize}
+
+Il devient alors le serveur et le reste jusqu'à ce qu'il se déconnecte ou qu'un autre client le remplace.
+
+Ensuite, d'autres clients peuvent se connecter à la partie.
+Pour ce faire, ils envoient une requête au créateur de la partie en indiquant leur IP et le port à utiliser.
+Ils reçoivent en retour les paramètres de la partie et la liste des joueurs.
+Le serveur signale aux autres connectés qu'un nouveau client s'est connecté afin qu'ils mettent à jour leur liste de spectateurs.
+
+Il convient de vérifier que le client n'a pas été banni pour triche et qu'il n'est pas déjà connecté.
+
+\section{Joueurs/spectateurs}
+
+Initialement, seul le serveur est un joueur.
+
+Lorsqu'un client se connecte, il est spectateur et peut alors demander à devenir joueur.
+
+Le serveur maintient une liste de spectateurs souhaitant devenir joueurs et, entre chaque main, s'il y a de la place disponible, en accepte autant que possible (par ordre de demande).
+
+Entre les mains, les joueurs peuvent se déconnecter ou devenir spectateurs.
+
+\section{Partie}
+
+\subsection{Déroulement}
+
+La partie commence lorsque le nombre de joueurs atteind la valeur indiquée lors de la création de la partie.
+
+Le dealer est le premier joueur de la liste des joueurs (le créateur de la partie, donc, sauf si celui-ci s'est déconnecté ou est devenu spectateur).
+
+La main se déroule comme indiqué ci-après.
+
+Une fois terminée :
+\begin{itemize}
+	\item s'il ne reste qu'un joueur, la partie est terminée ;
+	\item si le nombre maximum de joueurs n'est pas atteint, un ou plusieurs spectateurs deviennent joueurs, sachant que :
+	\begin{itemize}
+		\item ils doivent l'avoir demandé
+		\item le choix se fait par ordre d'entrée dans la liste
+	\end{itemize}
+	\item en fonction des paramètres indiqués lors de la création, le montant des SB, BB et Ante peut augmenter ; il peut également y avoir une pause de quelques minutes.
+\end{itemize}
+
+Puis le dealer devient le joueur situé après le dealer de la main précédente dans la liste des joueurs, et on recommence (notez que seule la position du dealer change, le serveur reste le même).
+
+\subsection{Actions possibles}
+
+Entre chaque main, les joueurs ont quatre possibilités :
+\begin{itemize}
+	\item continuer à jouer
+	\item sit-out (le joueur reste à la table, paie les mises obligatoires, mais se couche automatiquement)
+	\item devenir spectateur
+	\item quitter la partie
+\end{itemize}
+
+\section{Main}
+
+\subsection{Déroulement}
+
+Le serveur fait office de croupier (il distribue les cartes).
+
+Il indique à chaque joueur que c'est son tour et attend sa réponse.
+
+\subsection{Actions possibles}
+
+À chaque fois qu'un joueur doit jouer, il peut :
+\begin{itemize}
+	\item se coucher
+	\item miser ou relancer (selon que quelqu'un a déjà misé ou non)
+	\item checker (passer son tour)
+\end{itemize}
+
+Le client indique au serveur son action.
+Celui-ci vérifie qu'elle est valide : si c'est le cas, il indique aux autres joueurs l'action du joueur ; sinon, il bannit le joueur\footnote{Notez qu'il s'agit d'un bannissement immédiat et inconditionnel : il convient donc que le programme client vérifie la validité du coup du joueur (humain) avant de l'envoyer.} et indique aux autres joueurs qu'il s'est couché.
+
+\section{Bannissement}
+
+Il est possible de demander (sans raison) le bannissement d'un joueur.
+Celui-ci n'est effectivement banni que si un certain nombre (par exemple \tt Nb\_joueurs / 2\rm) de joueurs l'ont demandé.
+
+\section{Déconnexion}
+
+Il y a deux moyens de détecter une déconnexion : quand l'envoi d'un message échoue et quand un client censé envoyer un message ne le fait pas (timeout).
+
+\subsection{Déconnexion d'un client}
+
+Comme les clients ne communiquent qu'avec le serveur, c'est celui-ci qui détecte la déconnexion.
+Il le considère alors comme couché.
+
+Afin d'éviter ce cas de figure, il est recommandé aux programmes clients, si le joueur humain ne fait rien, de se coucher et se mettre sit-out.
+
+\subsection{Déconnexion du serveur}
+
+Lorsqu'un client tente d'envoyer un message au serveur et que ceci échoue, il convient de choisir un nouveau serveur.
+Le nouveau serveur sera le prochain dans l'ordre des joueurs (si le serveur était le dealer, c'est le SB, par exemple).
+
+Le joueur qui a détecté la déconnexion le signale au nouveau serveur qui envoie un message à tous les joueurs pour signaler que c'est désormais lui le serveur.
+
+Dans le cas où le serveur original est toujours connecté, il laisse la main au nouveau serveur et devient un client normal.
+
+Afin de s'assurer qu'en cas de déconnexion, un autre joueur puisse devenir serveur, le serveur stocke l'ensemble des données décrivant le jeu et, à chaque modification, les envoie à tous les joueurs.
+
+\subsection{Déconnexion volontaire}
+
+Si un joueur souhaite se déconnecter, il doit attendre la fin de la main en cours, puis il indique au serveur qu'il se déconnecte ; celui-ci fait passer l'information aux autres clients.
+
+Un spectateur peut se déconnecter n'importe quand ; il l'indique au serveur qui transmet l'information.
+
+Si c'est le serveur qui souhaite se déconnecter (ou devenir spectateur), il l'indique au joueur suivant, qui deviendra le nouveau serveur.
+
+\section{Chat}
+
+Un chat peut être implémenté par les clients.
+Lorsque le joueur (humain) poste un message, celui-ci est transmis au serveur qui le retransmet aux autres clients (joueurs et spectateurs), éventuellement après vérification (pour éviter les injures, par exemple).
+
+\end{document}

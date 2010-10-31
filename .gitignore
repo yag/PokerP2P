@@ -7,3 +7,8 @@
 *.cmx
 *~
 *.class
+*.log
+*.out
+*.toc
+*.aux
+*.pdf

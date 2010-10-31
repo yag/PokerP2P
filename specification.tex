@@ -1,0 +1,243 @@
+\documentclass[a4paper]{article}
+
+\usepackage[francais]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\ifpdf
+\usepackage[pdftex=true,hyperindex=true,colorlinks=true]{hyperref}
+\else
+\usepackage[hypertex=true,hyperindex=true,colorlinks=false]{hyperref}
+\fi
+
+\newcommand{\mailto}[1]{<\href{mailto:#1}{#1}>}
+
+\title{Projet de bureau d'étude : jeu de poker multijoueur}
+\author{
+	Florian \textsc{Canezin},\\
+	Matthieu \textsc{Dubet},\\
+	Marius \textsc{Moulis},\\
+	Régis \textsc{Spadotti},\\
+	Guillaume \textsc{Verdier}
+}
+\date{}
+
+\begin{document}
+
+\maketitle
+\clearpage
+
+\tableofcontents
+\clearpage
+
+\section{Rappel : présentation du projet}
+
+Le but de ce projet est de développer un jeu de Poker (Texas Hold'em) multijoueur en pair-à-pair décentralisé.
+
+\section{Groupe}
+
+\begin{itemize}
+	\item Florian \textsc{Canezin} \mailto{canezin.florian@gmail.com}
+	\item Matthieu \textsc{Dubet} \mailto{maattdd@gmail.com}
+	\item Marius \textsc{Moulis} \mailto{moulis.marius@gmail.com}
+	\item Régis \textsc{Spadotti} \mailto{regis.spadotti@gmail.com}
+	\item Guillaume \textsc{Verdier} \mailto{verdier.guillaume@live.fr}
+\end{itemize}
+
+\section{Rappel : calendrier}
+
+\begin{itemize}
+	\item 1\up{er} novembre 2010 : remise du livrable 1 (20\%)
+	\begin{itemize}
+		\item Documentation du protocole d'établissement de la table
+		\item Documentation du protocole pour un tour de jeu
+		\item Documentation du domaine
+		\item Documentation des besoins détaillés
+	\end{itemize}
+	\item 22 novembre 2010 : remise du livrable 2 (20\%)
+	\begin{itemize}
+		\item Mise au point de l'interface utilisateur (maquette)
+		\item Préparation des diagrammes de conception
+		\item Implémentation du protocole de communication
+	\end{itemize}
+	\item 3 janvier 2011 : remise du livrable 3 (60\%)
+	\begin{itemize}
+		\item Présentation des résultats
+		\item Archive correspondant à la version «~binaire~» de l'application contenant un \tt .jar \rm pour chaque implémentation
+		\item Archive contenant les sources de l'ensemble de l'application
+		\item Rapport du projet (incluant tous les livrables)
+	\end{itemize}
+\end{itemize}
+
+\section{Règles}
+
+\subsection{Déroulement général d'une partie}
+
+Attendre qu'il y ait suffisamment de joueurs
+
+Désigner le dealer (ainsi que les SB et BB)
+
+Tant qu'il reste au moins 2 joueurs
+
+\hspace{1cm}Jouer une main
+
+\vspace{5mm}
+Jouer une main :
+
+Faire tourner le dealer (joueur suivant dans l'ordre horaire)
+
+Poser les mises obligatoires (SB, BB, Ante)
+
+Distribuer 2 cartes à chaque joueur
+
+Tour de mises
+
+Si nombre de joueurs > 1
+
+\hspace{1cm}Distribuer le flop
+
+\hspace{1cm}Tour de mises
+
+\hspace{1cm}Si nombre de joueurs > 1
+
+\hspace{2cm}Distribuer le turn
+
+\hspace{2cm}Tour de mises
+
+\hspace{2cm}Si nombre de joueurs > 1
+
+\hspace{3cm}Distribuer le river
+
+\hspace{3cm}Tour de mises
+
+Donner son(leur) gain au(x) gagnant(s)
+
+\subsection{Mises obligatoires}
+
+Il y en a 3 : Small Blind (SB), Big Blind (BB) et Ante.
+
+La SB vaut la moitié de la BB.
+
+Les SB, BB et Ante augmentent toutes les \tt k \rm minutes (\tt k \rm fixé par le créateur de la partie) suivant un tableau \tt S \rm (également défini par le créateur de la partie).
+\tt S \rm indique pour chaque «~niveau~» le montant des SB, BB et Ante.
+
+La mise minimale est la BB.
+Si un joueur a un stack inférieur à la BB, il doit mettre tapis.
+
+Les Antes sont une mise obligatoire à poser avant de recevoir les cartes ; idem pour les SB et BB.
+
+La SB est située une position après le dealer dans le sens horaire.
+La BB est située deux positions après le dealer dans le sens horaire.
+Dans le cas d'un Head's-Up (deux joueurs), le dealer est la SB et l'autre joueur la BB.
+
+\subsection{Actions possibles}
+
+\begin{itemize}
+	\item Suivre : égaliser la plus grosse mise qui est sur la table.
+	\item Miser : sans limite autre que la mise obligatoire. Le minimum est donc la BB (sauf si le stack du joueur est inférieur à la BB).
+	\item Relancer : le joueur désirant relancer doit poser le montant de la plus forte enchère et rajouter une relance au moins égale à la BB, sans limite.
+	\item Se coucher : si le joueur ne souhaite pas poursuivre l'enchère, il peut se coucher (ou folder) et jeter ses cartes. Il est exclu de la main et perd toutes les sommes qu'il a engagée sur le tapis, y compris les mises qu'il a pu poser au tour de mise où il s'est couché.
+	\item Check : si rien n'a été misé sur la table à ce tour d'enchères, le joueur peut «~checker~» afin de voir les réactions des autres joueurs dans le but de s'aider à prendre une décision. Si un joueur mise, il devra payer (suivre ou relancer) afin de rester dans la partie, sinon il devra se coucher. Si tous les joueurs checkent, on donne une nouvelle carte (flop, turn ou river).
+\end{itemize}
+
+\subsection{Distribution des cartes}
+
+Le dealer distribue les cartes.
+Au début de chaque tour, il mélange les cartes.
+
+Le dealer tourne au début de chaque main d'une position dans le sens horaire.
+
+Chaque joueur obtient 2 cartes (appelées cartes privatives). Elles sont distribuées une par une (2 tours) dans le sens horaire (la SB reçoit la première carte).
+
+Après chaque tour de mise, le dealer distribue le flop (3 cartes), le turn (1 carte) et le river (1 carte).
+
+\subsection{Mains}
+
+Rappel : la couleur ne désigne pas rouge ou noir mais pique, trèfle, carreau ou coeur.
+
+\begin{enumerate}
+	\item Quinte flush : 5 cartes de rangs consécutifs de même couleur
+	\item Carré : 4 cartes de même rang
+	\item Full : 3 cartes de même rang et 2 cartes de même rang
+	\item Couleur : 5 cartes de même couleur
+	\item Suite : 5 cartes de rangs consécutifs (de couleurs différentes) ; l'as peut être utilisé après le roi ou avant le 2 (mais pas les deux en même temps)
+	\item Brelan : 3 cartes de même rang (et 2 cartes de rangs différents)
+	\item Double paire : 2 paires (de rangs différents, la troisième carte de rang différent également)
+	\item Paire : 2 cartes de même rang (et les 3 autres cartes de rangs différents)
+	\item Carte haute : la meilleure carte du jeu, de l'as au 2.
+\end{enumerate}
+
+\subsection{Fin d'un tour}
+
+Dans le cas où tous les joueurs sont couchés (sauf un), ce dernier gagne et peut révéler ou non ses cartes privatives.
+
+Au river, à la fin du tour de mise, le premier joueur qui a misé doit révéler sa main.
+Les autres joueurs ont le choix de révéler leurs cartes ou non.
+Dans le cas où ils ne les révèlent pas, ils sont déclarés perdants (même si leur jeu est meilleur que celui du gagnant).
+
+\subsection{Création de pots secondaires}
+
+Toutes les mises supérieures au plus petit tapis sont placées dans un pot secondaire et récursivement.
+
+\subsection{Répartition des gains}
+
+Le pot peut être divisé en deux catégories :
+\begin{itemize}
+	\item le pot principal remporté par le gagnant
+	\item le pot secondaire gagné par les joueurs qui possèdent la meilleure main parmi ceux qui ont participé à la création du pot
+\end{itemize}
+
+\subsection{Sit out}
+
+Un joueur sit out participe au jeu mais il se couche automatiquement.
+
+Pour reprendre la partie, il doit payer une BB.
+
+Un joueur est sit out s'il n'agit pas dans son temps imparti trois fois consécutives.
+
+\section{Paramètres}
+
+Ceux-ci sont réglables par le créateur de la partie (à la création) :
+
+\begin{itemize}
+	\item nombre minimal de joueurs
+	\item temps d'action et temps supplémentaire (quand un joueur le demande)
+	\item durée entre les augmentations de SB et BB ainsi que le montant de celles-ci
+\end{itemize}
+
+\section{Statistiques}
+
+Chaque joueur peut voir des statistiques le concernant et concernant les autres joueurs.
+Celles-ci indiquent :
+\begin{itemize}
+	\item le nombre de mains jouées (en position dealer, SB, BB et autre)
+	\item le nombre de fois qu'il a vu le flop
+	\item sa mise moyenne
+	\item le pot moyen de la table
+	\item le nombre de victoires
+	\item le nombre de parties gagnées avant la fin du tour (tous les autres joueurs couchés)
+	\item le nombre de tapis
+	\item éventuellement un classement en fonction de sa manière de jouer (lion, joker, rock, fish)
+\end{itemize}
+
+\section{Remarques diverses}
+
+Une partie peut, en plus des joueurs, accueillir un nombre quelconque de spectateurs.
+
+Quand un joueur a perdu, il devient spectateur (ce qui permet à un spectateur de prendre sa place, par ordre d'entrée dans la liste des spectateurs).
+
+Il est possible, en milieu de partie, de :
+\begin{itemize}
+	\item se connecter ; il est alors spectateur (et peut donc devenir joueur s'il y a de la place)
+	\item se déconnecter (volontairement ou non) ; la partie doit continuer normalement quelle que soit la position du joueur (dealer, SB, BB)
+\end{itemize}
+
+Un chat sera disponible (libre aux programmes clients de l'implémenter ou de l'ignorer).
+
+Il faudra déterminer :
+\begin{itemize}
+	\item si le recave est possible ou non
+	\item si l'on fait une pause entre chaque changement de valeur de SB et BB
+\end{itemize}
+
+\end{document}
