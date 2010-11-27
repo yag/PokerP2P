@@ -1,0 +1,439 @@
+\chapter{Maquette}
+
+\section{Introduction}
+
+Afin de simplifier la présentation de notre maquette de l'interface graphique 
+de notre logiciel de poker en P2P, nous allons la diviser selon le modèle MVC 
+(Model - View - Controller).\\
+Nous aurons 6 fenêtres pour réunir les fonctionnalités de notre application :
+
+\begin{enumerate}
+	\item \textbf{Démarrage :} Cette fenêtre sera la fenêtre de démarrage de 
+	       notre application et le point central de toutes ses fonctionnalités.
+	        Elle devra permettre à l'utilisateur de \textit{créer une partie}, 
+	        \textit{rejoindre une partie}, \textit{configurer} le programme 
+	        ainsi que de le \textit{quitter}. Elle devra aussi afficher 
+	        discrètement des informations élémentaires du logiciel comme par 
+	        exemple le langage de développement, les outils utilisées, 
+	        le numéro et date de version, les développeurs, 
+	        les licences éventuelles... 
+	
+	\item \textbf{Création de partie :} Cette fenêtre devra permettre à 
+	      l'utilisateur de créer une partie facilement. Elle lui proposera de :
+
+	\begin{itemize}
+		\item Choisir un nom pour la nouvelle partie.
+		\item Un nombre minimum de joueur à attendre pour que la partie commence.
+		\item Le nombre de joueur maximum de la table.
+		\item Le stack initial des joueurs.
+		\item L'intervalle de temps avant l'augmentation des blinds.
+		\item Le temps de parole.
+		\item Le temps accordé supplémentaire pour une demande de temps.
+		\item Le mode d'augmentation des blinds (grand, constant, nul, léger).
+		\item Une pré-visualisation du schéma d'augmentation des blinds.
+		\item Quel port utiliser (avec une proposition de port par défaut).
+		\item Un rappel de son adresse IP.
+	\end{itemize}
+
+	\item \textbf{Rejoindre une partie :} Cette fenêtre proposera à l'utilisateur
+	      d'entrer une adresse IP d'un serveur de partie ainsi qu'un numéro de 
+	      port. Un port par défaut sera proposé à l'utilisateur. Lorsque 
+	      l'utilisateur aura cliqué sur `Rejoindre', une 
+	      \textit{prévisualisation} de la partie demandée (si elle existe) sera 
+	      proposée.
+	
+	\item \textbf{Prévisualisation :} Cette fenêtre permettra à l'utilisateur, 
+	       après que ce dernier est choisi de rejoindre une partie, d'obtenir 
+	       une prévisualisation de l'état de la partie qu'il a choisi et ainsi 
+	       lui permettre de confirmer ou d'infirmer son choix.\\
+	Cette prévisualisation explicitera :
+
+	\begin{itemize}
+		\item Le nom de la table.
+		\item Le nombre de joueur actuel à la table.
+		\item Le pot moyen.
+		\item Le nombre moyen de joueur par main.
+		\item L'état des blinds.
+		\item Un classement des joueurs à la table.
+		\item La liste d'attente (des spectateurs).
+		\item Le nombre de joueur minimum pour la table.
+		\item Le nombre de joueur maximum pour la table.
+		\item Le stack initial.
+		\item Le blind up.
+		\item Le temps de parole.
+		\item Le temps accordé supplémentaire pour une demande de temps.
+ 		\end{itemize} 
+
+		\item \textbf{Configuration :} Cette fenêtre permettra de configurer 
+		      l'application. Les préférences de l'utilisateur seront ensuite 
+		      enregistrées dans un fichier externe. Avec cette interface, 
+		      l'utilisateur pourra configurer deux types de paramètres :
+
+		\begin{itemize}
+			\item Les paramètres généraux de l'interface qui lui permettrons 
+			      de choisir :
+
+			\begin{itemize}
+				\item La langue du logiciel.
+				\item La devise utilisée par l'application.
+				\item Le thème de l'interface graphique.
+				\item Son nom dans le jeu ainsi que son avatar.
+			\end{itemize}
+
+			\item Ses préférences, dans lesquelles il décidera :
+			
+			\begin{itemize}
+				\item S'il veut automatiquement cacher sa main lorsqu'il a perdu
+				       ou non.
+				\item S'il veut automatiquement cacher sa main en cas de victoire
+				      par couchage ou non.
+				\item S'il veut que le logiciel place automatiquement ses mises 
+				      obligatoires pour lui ou non.
+				\item S'il veut que la demande de temps soit effectuée à chaque 
+				      fois que son temps de décision s'est écoulé ou non.
+				\item S'il veut activer l'analyseur (tracker).
+			\end{itemize}
+			
+		\end{itemize}
+		
+		\item \textbf{Table :} Cette fenêtre sera la fenêtre principale de 
+		      l'application et contiendra toutes les fonctionnalités liées au 
+		      jeu. Elle affichera : 
+		
+		\begin{itemize}
+			\item La table de jeu, c'est-à-dire : 
+			
+			\begin{itemize}
+				\item Les joueurs (nom, avatar, valeur de son stack) à la table.
+				\item Les pots (principal et secondaires) sous forme de jetons. 
+				      La valeur de chaque pot pourra être visualisée par 
+				      l'utilisateur.
+				\item Le tableau.
+			\end{itemize}
+			
+			\item Le classement des 3 premiers joueurs de la table en fonction 
+			      de leurs jetons.
+			\item Les cartes privatives du \og joueur-utilisateur \fg. 
+			\item Les résultats de l'analyseur (tracker) des chances que le 
+			      `joueur-utilisateur' à de gagner la main (si ce dernier a 
+			       activé la fonctionnalité évidement).
+			\item La valeur du stack du \og joueur-utilisateur \fg.
+			\item Les action possibles du \og joueur-utilisateur \fg, à savoir : 
+			      Se Coucher, Relancer, Miser, Suivre, Passer et cela sous 
+			      forme de boutons.
+			\item La dernière notification du croupier.
+			\item Les fonctionnalités annexes de l'application 
+			      (sous forme de slider pour plus d'ergonomie) : 
+			
+			\begin{itemize}
+				\item \textbf{Logs :} Qui affiche l'ensemble des notifications 
+				      du croupier.
+				\item \textbf{Chat :} Qui permettra à l'utilisateur de chatter 
+				      avec les autres joueurs de la table.
+				\item \textbf{Statistiques :} Qui affichera les statistiques de 
+				      la table et des joueurs.
+				\item \textbf{Configuration :} Qui permettra à l'utilisateur de 
+				      configurer l'application.
+				\end{itemize} 
+				
+			\end{itemize}
+			
+		\end{enumerate}
+
+\section{Vue}
+
+\subsection{Les différentes fenêtres de l'application}
+
+L'application sera constituée de 6 fenêtres principales :
+
+\begin{itemize}
+	\item Démarrage
+	\item Créer partie
+	\item Rejoindre partie
+	\item Prévisualisation
+	\item Table
+	\item Table statistiques
+	\item Configuration\\
+\end{itemize}
+
+L'aperçu graphique de l'application accompagné de chacune des fenêtres est 
+disponible, en annexe.
+
+\subsection{Diagramme d'interdépendances entre les différentes fenêtres}
+Le diagramme présente la relation de navigation entre les différentes fenêtres 
+de l'application. Cette relation est modélisée dans le diagramme par des flèches.
+\begin{figure}[ht]
+	\centering \includegraphics[width=.75\linewidth]{figures/dependance.pdf}
+	\caption{Relation de navigation entre les différentes fenêtres}
+\end{figure}
+
+\section{Contrôleur}
+
+\subsection{Introduction}
+Nous allons mettre en évidence dans cette partie les différentes contraintes 
+que nous imposerons aux composants de notre interface afin d'assurer l'intégrité 
+des échanges entre la machine et l'utilisateur ainsi que les actions associées 
+aux activations des composants. 
+
+\subsection{Démarrage}
+
+\subsubsection{Contraintes composants}
+
+Il n'y a aucune contrainte sur les composants de cette fenêtre.
+
+\subsubsection{Actions composants}
+
+\begin{itemize}
+	\item Le bouton \textit{Créer partie} déclenchera la création d'une nouvelle
+	      fenêtre de \textbf{Création de partie}.
+	\item Le bouton \textit{Rejoindre partie} déclenchera la création d'une 
+	      nouvelle fenêtre de \textbf{Rejoindre partie}.
+	\item Le bouton \textit{Configuration} déclenchera la création d'une 
+	      nouvelle fenêtre de \textbf{Configuration}.
+	\item Le bouton \textit{Quitter} déclenchera la fermeture du programme, 
+	      ce qui implique la fermeture des éventuelles connexions réseaux, 
+	      la destruction des objets graphiques et l'arrêt du programme.
+\end{itemize}
+
+\subsection{Création de partie}
+
+\subsubsection{Contraintes composants}
+
+\begin{itemize}
+	\item Le nom de la partie ne doit pas dépasser 64 caractères alphanumériques.
+	\item $NombreJoueurMin \in [2 ; 10]$. Le nombre de joueurs minimum aura une 
+	      valeur par défaut de 2.
+	\item $NombreJoueurMax \in [2 ; 10] \wedge NombreJoueurMin \leq 
+	      NombreJoueurMax$. Le nombre de joueur maximum aura une valeur 
+	      par défaut de 9.
+	\item $StackInitial \in [1 000 ; 100 000] \wedge StackInitial \pmod{1000}
+	       = 0 $. Le stack aura une valeur par défaut de 1000.
+	\item $BlindUp \in [0 ; 60]$. Le Blind-Up doit être exprimé en minute et 
+	      doit être une valeur entière. Le Blind-Up aura une valeur par défaut 
+	      de 5. 
+	\item $TempsDeParole \in [5; 60]$. Le Temps de parole doit être exprimé en 
+	      seconde et doit être une valeur entière. Le Temps de parole aura une 
+	      valeur par défaut de 15.
+	\item $DemandeDeTemps \in [0; 60]$. La demande de temps doit être exprimée 
+	      en seconde et doit être une valeur entière. La DemandeDeTemps aura une
+	      valeur par défaut de 45.
+	\item Le mode d'augmentation des blinds doit être soit \textit{grand} soit 
+	      \textit{léger}, soit \textit{linéaire}, soit \textit{nul}. La valeur 
+	      par défaut sera linéaire.
+	\item La prévisualisation du schéma d'augmentation des blinds devra être un 
+	      tableau de 30 lignes avec 4 colonnes (niveau, SB, BB, ANTE). 
+	      Les champs pourront être éditables et seront initialisés en fonction 
+	      d'un schéma interne et du stack initial fourni.
+	\item $Port \in [1024 ; 65545]$. Le port devra avoir une valeur par défaut de 2000.
+\end{itemize}
+
+\subsubsection{Actions composants}
+
+\begin{itemize}
+	\item Un bouton \textit{Annuler} détruira la fenêtre courante.
+	\item Un bouton \textit{Défaut} permettra de remettre les valeurs 
+          par défauts de chaque composant.
+	\item Un bouton \textit{Créer Partie} permettra de récolter les valeurs des 
+	      composants, regarder s'ils vérifient les contraintes imposées plus haut
+	      et ensuite appellera la méthode \texttt{Creer\_Partie()} avec les 
+	      paramètres donnés. A la fin, il entrainera la destruction de la fenêtre
+	      courante si la création de la partie réussi.
+\end{itemize}
+
+\subsection{Rejoindre partie}
+
+\subsubsection{Contraintes composants}
+
+\begin{itemize}
+	\item Le champs d'adresse IP devra accepter 4 nombres entiers compris entre 
+	      0 et 255. Ce champs aura pour valeur par défaut l'adresse IP du client.
+	\item Le numéro de port devra être un nombre entier compris entre 1024 et 65545.
+	      Il sera initialisé à 2000.
+\end{itemize}
+
+\subsubsection{Actions composants}
+
+\begin{itemize}
+	\item Un bouton \textit{Annuler} détruira la fenêtre courante.
+	\item Un bouton \textit{Rejoindre} permettra de récolter les valeurs des 
+	      composants, regarder s'ils vérifient les contraintes imposées plus haut
+	      et ensuite appellera la méthode \texttt{Previsualisation\_Partie()} avec
+	      les paramètres donnés. A la fin, il entrainera la destruction de la 
+	      fenêtre courante si la prévisualisation réussie.
+\end{itemize}
+
+\subsection{Prévisualisation}
+
+\subsubsection{Contraintes composants}
+Néant.
+
+\subsubsection{Actions composants}
+
+\begin{itemize}
+	\item Un bouton \textit{Retour} détruira la fenêtre courante.
+	\item Un bouton \textit{Rejoindre} lancera un appel à la méthode 
+	      \texttt{Rejoindre\_Partie()}. Si l'appel réussi, on détruira la fenêtre courante.
+\end{itemize}
+
+\subsection{Configuration}
+
+\subsubsection{Contraintes composants}
+
+\begin{itemize}
+	\item Le choix de la langue ne prendra que des valeurs finies (Anglais et 
+	Français pour l'instant).
+	\item Le choix de la devise ne prendra que des valeurs finies (Dollar, Euro
+	      et Livre pour l'instant).
+	\item Le choix du thème de prendra que des valeurs finies (Thème 1, 2, 3 ou 
+	      4 pour l'instant).
+	\item Le nom du joueur devra contenir au maximum 64 caractères 
+	      alphanumériques. La valeur par défaut sera Joueur.
+	\item L'avatar du joueur devra être une image redimensionnée en 100x100 pixels.
+	      Les formats possibles seront (GIF, PNG, JPG, BMP et JPEG)
+\end{itemize}
+
+\subsubsection{Actions composants}
+
+\begin{itemize}
+	\item Un bouton \textit{Annuler} détruira la fenêtre courante.
+	\item Un bouton \textit{Rétablir} permettra de remettre les valeurs par défaut.
+	\item Un bouton \textit{Sauvegarder} permettra de récolter les valeurs des 
+	      composants, de regarder s'ils respectent les contraintes imposées plus
+	      haut et ensuite de sauvegarder l'ensemble des préférences dans un fichier
+	      de configuration. Si l'enregistrement aboutit, la fenêtre courante est détruite.
+\end{itemize}
+
+\subsection{Table}
+
+\subsubsection{Contraintes composants}
+
+\begin{itemize}
+	\item Les composants \textit{Configuration}, \textit{Logs}, \textit{Chat} 
+	     \& \textit{Statistiques} devront être parfaitement intégrés à 
+	     l'interface et de manière ergonomique. Nous envisageons donc 
+	     des \og sliders \fg pour chacun de ces trois composants.
+	\item La partie \textit{Configuration} reprendra les mêmes composants que 
+	      la fenêtre \textit{configuration des préférences du joueur}. 
+	\item Les boutons \textit{Miser}, \textit{Relancer} \& \textit{Suivre} 
+	      ne pourront pas permettre au joueur de miser plus que son tapis.
+	\item Les boutons \textit{Suivre} \& \textit{Miser} s'adapterons en fonction
+	      de la situation et pourront devenir respectivement des boutons de 
+	      \textit{Passer} et \textit{Relancer}.  
+	\item Les boutons \textit{Se Coucher}, \textit{Suivre}, \textit{Passer}, 
+	      \textit{Miser} \& \textit{Relancer} ne seront actifs que si c'est au 
+	      joueur en question de parler.
+\end{itemize}
+
+\subsubsection{Actions composants}
+
+\begin{itemize}
+	\item Les boutons \textit{Se Coucher}, \textit{Suivre}, \textit{Passer}, 
+	      \textit{Miser} \& \textit{Relancer} provoquerons l'appel des méthodes 
+	      qui leur sont associées.
+	\item Le composant \textit{Chat} aura un bouton \textit{Envoyer} qui 
+	      provoquera l'envoi d'un message aux autres joueurs, un bouton 
+	      \textit{Effacer} qui effacera tout le contenu du chat. Un champ de 
+	      texte en lecture seule permettra au joueur de lire et de recevoir le 
+	      contenu du chat alors qu'un autre permettra de saisir les messages à 
+	      envoyer.
+	\item Le composant \textit{Statistiques} aura un bouton \textit{Effacer} qui
+	      effacera l'ensemble des statistiques enregistrés jusqu'à lors. Les 
+	      statistiques seront alors réinitialisées à zéro.
+	\item Le composant \textit{Logs} qui affiche les notifications du Croupier 
+	      aura lui aussi un bouton \textit{Effacer} qui permettra au joueur 
+	      d'effacer l'ensemble des notifications du Croupier.
+	\item Tous les pots afficheront leur valeur numérique lorsque le client 
+	      passera sa souris dessus.
+\end{itemize}
+
+\section{Statistiques}
+
+\subsection{Introduction}
+
+Nous avons décidé de pousser un peu plus loin l'analyse statistique demandée 
+dans le sujet de BE et de transformer cette analyse en un module complet gérant 
+un maximum d'informations publiques fournises par les joueurs de la table. 
+Ces informations seront traitées ensuite par le module et renvoyée au client de 
+notre application afin de l'aider à prendre les décisions de son jeux. \\ 
+Comme cela représente un assez gros traitement et une grande quantité 
+d'informations, nous avons décidé de séparer cette partie du code afin de la 
+rendre plus facile à améliorer et à maintenir.\\
+Il est à noter que ces statistiques seront totalement locales et éphémères. 
+On notera aussi que ces statistiques ont été séparées en deux sous classes : 
+
+\begin{itemize}
+	\item Les statistiques générales de la table.
+	\item Les statistiques relatives à un joueur.
+\end{itemize} 
+
+\subsection{Pour le code}
+
+Un nouveau package JAVA est à prévoir.
+Il faudra que chaque événement de la table (Mise d'un joueur, Fin de partie, 
+Blind-Up...) provoque l'appel d'une méthode spécifique à l'événement qui s'est 
+produit.
+Ensuite, cette méthode devra lancer un appel à une méthode 
+\texttt{Mise\_A\_Jour()}  qui mettra à jour les statistiques.
+Les méthodes \texttt{Initialiser\_Statistiques()} et 
+\texttt{Effacer\_Statistiques()} auront respectivement pour mission d'Initialiser
+les statistiques à 0 au début de la partie et d'effacer l'ensemble des statistiques
+ enregistrés jusque là.
+
+\subsection{Statistiques générales}
+
+Les statistiques générales font références aux facteurs généraux de la table,
+ à savoir : 
+
+\begin{itemize}
+	\item Le pot moyen de la table.
+	\item Nombre moyen de joueurs par main.
+	\item L'état des blinds (niveau, SB, BB, ANTE).
+	\item Le classement des joueurs à  la table en fonction de leur tapis. 
+	     Ce classement mettra en évidence le cheap looser\footnote{Le cheap looser
+	    est le joueur qui a le tapis le plus faible de la table.}, le cheap leader
+	    \footnote{Le cheap leader est le joueur qui possede le tapis le plus fort 
+	    de la table.} ainsi que les killers\footnote{Lorsqu'un joueur élimine un
+	     autre joueur de la table, on dit qu'il l'a tué ou \og killé \fg et est 
+	    ainsi qualifié de \og killer \fg.} et leur nombre de kill.
+	\item Le nombre total de parties distribuées.
+	\item Le nombre de Flop, Turn \& River distribués depuis le début de la partie
+	      et leur pourcentage par rapport au nombre total de partie distribuées.
+	\item Le nombre de pots gagnés sans abattage et son pourcentage par rapport
+	      au nombre total de partie distribuées.
+	\item Le nombre de Tapis. 
+	\item La relance moyenne.
+	\item La mise moyenne.
+	\item Nombre de tour complet de table.
+\end{itemize}
+
+\subsection{Statistiques Joueur}
+
+Les statistiques du joueur sont les statistiques qui lui sont propres, à savoir :
+
+\begin{itemize}
+	\item Nombre parties totales jouées.
+	\item Nombre de parties engagées (+ pourcentage par rapport au nombre total
+	     de parties jouées).
+	\item Nombre de parties gagnées (+ pourcentage par rapport au nombre total
+	     de parties engagées).
+	\item Nombre de parties gagnées sans abattages (+ pourcentage par rapport au
+	     nombre total de parties gagnées).
+	\item Nombre de Flop, Turn \& River reçu (+ pourcentage par rapport au 
+	      nombre de parties engagées).  
+	\item La mise moyenne.
+	\item La relance moyenne.
+	\item Le plus haut pot.
+	\item Le plus bas pot.
+	\item Nombre de tapis engagés.
+	\item Le total des gains.
+	\item Le total des pertes.
+	\item Pourcentage du nombre total de gains par rapport au total de pertes.
+	\item Le statut du joueur : cheap leader, cheap looser, killer ou aucun.
+	\item Le nombre de kill.
+\end{itemize}
+
+\subsection{Analyseur de main}
+
+En plus des statistiques cités plus haut, nous intégrerons un analyseur de main 
+qui permettra au client de savoir en tant réel ses chances de victoires en fonction
+ de ses cartes, du nombre de joueurs à la tables et des cartes du tableau. 
