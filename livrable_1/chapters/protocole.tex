@@ -1,34 +1,5 @@
-\documentclass[a4paper]{article}
+%!TEX root = /Users/regis/code/M1/be/projet_be.tex
 
-\usepackage[francais]{babel}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
-\ifpdf
-\usepackage[pdftex=true,hyperindex=true,colorlinks=true]{hyperref}
-\else
-\usepackage[hypertex=true,hyperindex=true,colorlinks=false]{hyperref}
-\fi
-
-\newcommand{\mailto}[1]{<\href{mailto:#1}{#1}>}
-
-\title{Projet de bureau d'étude : jeu de poker multijoueur\\Protocole de communication}
-\author{
-	Florian \textsc{Canezin},\\
-	Matthieu \textsc{Dubet},\\
-	Marius \textsc{Moulis},\\
-	Régis \textsc{Spadotti},\\
-	Guillaume \textsc{Verdier}
-}
-\date{}
-
-\begin{document}
-
-\maketitle
-\clearpage
-
-\tableofcontents
-\clearpage
 
 \section{Introduction}
 
@@ -168,5 +139,3 @@ Si c'est le serveur qui souhaite se déconnecter (ou devenir spectateur), il l'i
 
 Un chat peut être implémenté par les clients.
 Lorsque le joueur (humain) poste un message, celui-ci est transmis au serveur qui le retransmet aux autres clients (joueurs et spectateurs), éventuellement après vérification (pour éviter les injures, par exemple).
-
-\end{document}

@@ -1,73 +1,4 @@
-\documentclass[a4paper]{article}
-
-\usepackage[francais]{babel}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
-\ifpdf
-\usepackage[pdftex=true,hyperindex=true,colorlinks=true]{hyperref}
-\else
-\usepackage[hypertex=true,hyperindex=true,colorlinks=false]{hyperref}
-\fi
-
-\newcommand{\mailto}[1]{<\href{mailto:#1}{#1}>}
-
-\title{Projet de bureau d'étude : jeu de poker multijoueur}
-\author{
-	Florian \textsc{Canezin},\\
-	Matthieu \textsc{Dubet},\\
-	Marius \textsc{Moulis},\\
-	Régis \textsc{Spadotti},\\
-	Guillaume \textsc{Verdier}
-}
-\date{}
-
-\begin{document}
-
-\maketitle
-\clearpage
-
-\tableofcontents
-\clearpage
-
-\section{Rappel : présentation du projet}
-
-Le but de ce projet est de développer un jeu de Poker (Texas Hold'em) multijoueur en pair-à-pair décentralisé.
-
-\section{Groupe}
-
-\begin{itemize}
-	\item Florian \textsc{Canezin} \mailto{canezin.florian@gmail.com}
-	\item Matthieu \textsc{Dubet} \mailto{maattdd@gmail.com}
-	\item Marius \textsc{Moulis} \mailto{moulis.marius@gmail.com}
-	\item Régis \textsc{Spadotti} \mailto{regis.spadotti@gmail.com}
-	\item Guillaume \textsc{Verdier} \mailto{verdier.guillaume@live.fr}
-\end{itemize}
-
-\section{Rappel : calendrier}
-
-\begin{itemize}
-	\item 1\up{er} novembre 2010 : remise du livrable 1 (20\%)
-	\begin{itemize}
-		\item Documentation du protocole d'établissement de la table
-		\item Documentation du protocole pour un tour de jeu
-		\item Documentation du domaine
-		\item Documentation des besoins détaillés
-	\end{itemize}
-	\item 22 novembre 2010 : remise du livrable 2 (20\%)
-	\begin{itemize}
-		\item Mise au point de l'interface utilisateur (maquette)
-		\item Préparation des diagrammes de conception
-		\item Implémentation du protocole de communication
-	\end{itemize}
-	\item 3 janvier 2011 : remise du livrable 3 (60\%)
-	\begin{itemize}
-		\item Présentation des résultats
-		\item Archive correspondant à la version «~binaire~» de l'application contenant un \tt .jar \rm pour chaque implémentation
-		\item Archive contenant les sources de l'ensemble de l'application
-		\item Rapport du projet (incluant tous les livrables)
-	\end{itemize}
-\end{itemize}
+%!TEX root = /Users/regis/code/M1/be/projet_be.tex
 
 \section{Règles}
 
@@ -239,5 +170,3 @@ Il faudra déterminer :
 	\item si le recave est possible ou non
 	\item si l'on fait une pause entre chaque changement de valeur de SB et BB
 \end{itemize}
-
-\end{document}

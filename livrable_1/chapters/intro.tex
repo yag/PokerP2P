@@ -1,0 +1,42 @@
+%!TEX root = /Users/regis/code/M1/be/projet_be.tex
+
+\section{Introduction}
+
+\subsection{\`A propos de ce document}
+Dans le cadre de la réalisation d'une interface de poker multijoueur en 
+pair-à-pair décentralisé, ce document constitue la première étape de 
+modélisation du projet. 
+Il contient :
+{\renewcommand\labelitemi{\textbullet}
+\begin{itemize}
+	\item Les diagrammes d'activités pour la modélisation des processus métier.
+	\item Un diagramme de classe pour la modélisation du domaine métier.
+	\item La spécification du protocole de communication entre les clients et le
+	      serveur.
+	\item La spécification complète des besoins fonctionnels. 
+\end{itemize}}
+
+\section{Contraintes techniques}
+
+{\renewcommand\labelitemi{\textbullet}
+\begin{itemize}
+	\item Le langage de programmation utilisé est JAVA (version $>= 1.5$) pour 
+	      la partie client, comme la partie serveur.
+	\item La couche de communication sera implémentée en utilisant le protocole
+		  JAVA RMI (Remote Method Invocation), ce qui suppose que les parties
+		  clientes et serveur sont compatibles au niveau de leurs interfaces.
+	\item Le programme livré devra être portable et fonctionner dans les
+	      environnements de type Windows ou Unix.
+\end{itemize}}
+
+\section{Cahier de spécifications}
+
+\subsection{Notre démarche}
+
+Le sujet du bureau d'étude étant relativement concis, nous avons décidés dans un
+premier temps de produire un cahier de spécifications complet qui nous servira
+de base pour les travaux à venir.
+Dans ce cahier sont regroupés l'ensemble des règles métier concernant le poker,
+principalement les règles du jeu, puis quelques considérations techniques sur 
+des fonctionnalités à ajouter à notre logiciel.
+

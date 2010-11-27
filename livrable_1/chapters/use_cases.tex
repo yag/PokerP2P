@@ -1,0 +1,523 @@
+%!TEX root = /Users/regis/code/M1/be/projet_be.tex
+
+\minitoc
+\clearpage
+
+\section*{Diagramme de cas d'utilisation}\vspace{3em}
+\begin{figure}[h]
+	\centering \includegraphics[width=.5\textwidth]{uml/usecase/usecase.pdf}
+\end{figure}
+\clearpage
+
+%%-------------------------  USE CASE : Créer partie  ------------------------%%
+
+\begin{usecase}{Créer partie}
+	
+	\begin{presentation}
+		\actor Utilisateur
+		\goal ouverture d'une table de jeu selon les paramètres définis 
+		      (cf règles de gestion).
+		
+		\begin{precondition}
+			\aucune
+		\end{precondition}
+		
+		\begin{postcondition}
+			\aucune
+		\end{postcondition}
+		
+		\begin{includeuc}
+			\aucun
+		\end{includeuc}
+	\end{presentation}
+	
+	\begin{scenario}
+		\start demande la création d'une table de jeu
+			\system demande les paramètres (cf règles de gestion)
+		\user fournit les paramètres
+			\system vérifie la validité de ces données et crée la partie
+	\end{scenario}
+	
+	\begin{alternative}
+		\nomalt Échec vérification
+			\condition à l'étape 4, si la validation d'un des paramètres échoue
+			
+			\begin{alt}
+				\item GOTO étape 3
+			\end{alt}
+	\end{alternative}
+	
+	\begin{regles}
+		\nom Les paramètres doivent être valides  :
+		
+		\begin{enumerate}
+			\regle la cave initiales, à partir de 10 \$, sans limite
+			\regle temps de décision entre 1 et 15 secondes
+			\regle nombre de joueurs requis pour commencer à jouer, entre 2 et 8
+			\regle nombre de joueurs maximum à la table, entre 2 à 8
+			\regle SB et BB de départ
+			\regle temps entre les blind-up (au moins une minute, sans limite)
+			\regle schéma d'augmentation des SB, BB et Ante
+		\end{enumerate}
+
+	\end{regles}
+	
+	\sequencediagram{uml/usecase/TableCreationSequenceDiagram.pdf}
+	                {Créer partie}
+	
+\end{usecase}
+
+%%----------------------------------------------------------------------------%%
+
+%%----------------------  USE CASE : Rejoindre Partie  -----------------------%%
+
+\begin{usecase}{Rejoindre partie}
+	
+	\begin{presentation}
+		\actor Utilisateur
+		\goal accèder à une table de jeu de manière à pouvoir jouer, mais sans 
+		      interrompre une main en cours, donc en devenant spectateur.
+		
+		\begin{precondition}
+			\aucune
+		\end{precondition}
+		
+		\begin{postcondition}
+			\condition spectateur
+			\condition en attente de fin de main pour pouvoir postuler pour 
+			           devenir joueur si une place est libre
+		\end{postcondition}
+		
+		\begin{includeuc}
+				\aucun
+		\end{includeuc}
+		
+	\end{presentation}
+
+	\begin{scenario}
+		\start demande l'accès à une table de jeu
+		\system vérifie l'existence de la table de jeu et rejoint cette table
+	\end{scenario}
+
+	\begin{alternative}
+		\nomalt Erreur table
+		\condition à l'étape 2, si la table n'existe pas
+
+		\begin{alt}
+			\system prévient l'acteur et celui-ci reste spectateur
+		\end{alt}
+
+		\nomalt Erreur banni
+		\condition à l'étape 2, si le serveur refuse la connexion car le 
+		joueur a été banni
+
+		\begin{alt}
+			\user est averti et GOTO 1
+		\end{alt}
+
+	\end{alternative}
+	
+	\sequencediagram{uml/usecase/TableJoinSequenceDiagram.pdf}
+	                {Rejoindre Partie}
+	
+\end{usecase}
+
+%%----------------------------------------------------------------------------%%
+
+%%-------------------  USE CASE : Demander Devenir Joueur  -------------------%%
+
+\begin{usecase}{Demander Devenir Joueur}
+	
+	\begin{presentation}
+		\actor Spectateur
+		\goal passer du statut de spectateur à celui de joueur au sein de la 
+		      table de jeu actuelle, et pouvoir participer à la partie en cours.
+		
+		\begin{precondition}
+			\condition être spectateur d'une table de jeu ouverte
+			\condition il n'y a pas de main en cours
+		\end{precondition}
+		
+		\begin{postcondition}
+			\condition joueur
+		\end{postcondition}
+		
+		\begin{includeuc}
+			\aucun
+		\end{includeuc}
+	\end{presentation}
+	
+	\begin{scenario}
+		\start demande à devenir joueur
+			\system demande au serveur l'autorisation et l'utilisateur devient 
+			        joueur
+	\end{scenario}
+	
+	\begin{alternative}
+		\nomalt Impossible Joueur
+			\condition à l'etape 2, si le serveur refuse que le spectateur 
+			           devienne joueur
+		
+		\begin{alt}
+			\system prévient l'acteur et celui-ci reste spectateur
+		\end{alt}
+	\end{alternative}
+	
+	\begin{regles}
+		\nom Le spectateur peut ne pas pouvoir devenir joueur pour plusieurs 
+		     raisons :
+		
+		\begin{enumerate}
+			\regle il n'y a pas de place
+			\regle d'autres spectateurs ont demandé à devenir joueurs avant lui
+		\end{enumerate}
+		
+	\end{regles}
+	
+	\sequencediagram{uml/usecase/BecomingPlayerSequenceDiagram.pdf}
+	                {Demande devenir joueur}
+	
+\end{usecase}
+
+%%----------------------------------------------------------------------------%%
+
+%%-----------------------  USE CASE : QUITTER PARTIE  ------------------------%%
+
+\begin{usecase}{Quitter Partie}
+	
+	\begin{presentation}
+		\actor Spectateur ou Joueur
+		\goal se déconnecter volontairement d'une table de jeu
+		
+		\begin{precondition}
+			\condition avoir rejoint cette table
+			\condition si l'acteur initiateur est un joueur, qu'il n'y ait pas 
+			           de main en cours
+		\end{precondition}
+		
+		\begin{postcondition}
+			\condition état initial du systeme
+		\end{postcondition}
+		
+		\begin{includeuc}
+			\aucun
+		\end{includeuc}
+	\end{presentation}
+	
+	\begin{scenario}
+		\start demande à être déconnecté de la table
+			\system revient à son etat initial
+	\end{scenario}
+	
+	\begin{alternative}
+		\nomalt Erreur Main
+			\condition à l'étape 2, si une main est en cours et que l'acteur 
+			           initiateur y joue
+			
+		\begin{alt}
+			\system indique au joueur qu'il lui faut attendre la fin de la main
+		\end{alt}
+	\end{alternative}
+	
+	\sequencediagram{uml/usecase/DeconnexionSequenceDiagram.pdf}
+	                {Quitter partie}
+	
+\end{usecase}
+
+%%----------------------------------------------------------------------------%%
+
+%%-----------------------  USE CASE : Envoyer Message  -----------------------%%
+
+\begin{usecase}{ Envoyer Message}
+	
+	\begin{presentation}
+		\actor Spectateur ou Joueur
+		\goal communiquer avec d'autres joueurs/spectateurs de la table par des 
+		      messages textuels.
+		
+		\begin{precondition}
+			\condition avoir rejoint une table
+		\end{precondition}
+		
+		\begin{postcondition}
+			\aucune
+		\end{postcondition}
+		
+		\begin{includeuc}
+			\aucun
+		\end{includeuc}
+	\end{presentation}
+	
+	\begin{scenario}
+		\start demande le post d'un message dans le chat
+			\system envoie le message au serveur et l'affiche dans le chat
+	\end{scenario}
+	
+	\begin{alternative}
+		\nomalt Envoi impossible
+			\condition À l'étape 2, si l'utilisateur n'a pas le droit de poster 
+			           le message
+			
+			\begin{alt}
+				\system l'en informe et n'envoie pas le message
+			\end{alt}
+	\end{alternative}
+	
+	\begin{regles}
+		\nom L'utilisateur peut ne pas avoir le droit de poster de message si :
+		
+		\begin{enumerate}
+			\regle il a déjà posté 3 messages d'affilée
+			\regle il a déjà posté 3 messages en moins d'une minute
+			\regle le message contient certains mots interdits (injures, par exemple)
+		\end{enumerate}
+	\end{regles}
+	
+	\sequencediagram{uml/usecase/ChatSequenceDiagram.pdf}
+	                {Envoyer message}
+		
+\end{usecase}
+
+%%----------------------------------------------------------------------------%%
+
+%%---------------------  USE CASE : Devenir Spectateur  ----------------------%%
+
+\begin{usecase}{Devenir Spectateur}
+	
+	\begin{presentation}
+		\actor Joueur
+		\goal arrêter de jouer à la table mais observer le déroulement 
+		      de la partie en cours
+		
+		\begin{precondition}
+			\condition avoir rejoint une table
+			\condition être joueur à cette table
+			\condition qu'il n'y a pas une main en cours
+			\condition qu'il y ait au moins 2 autres joueurs à la table
+		\end{precondition}
+		
+		\begin{postcondition}
+			\condition spectateur
+		\end{postcondition}
+		
+		\begin{includeuc}
+			\aucun
+		\end{includeuc}
+	\end{presentation}
+	
+	\begin{scenario}
+		\start demande à être spectateur
+			\system annonce devenir spectateur et le devient
+	\end{scenario}
+	
+	\sequencediagram{uml/usecase/BecomingSpectatorSequenceDiagram.pdf}
+	                {Devenir spectateur}
+	
+\end{usecase}
+
+%%----------------------------------------------------------------------------%%
+
+%%-------------------------  USE CASE : Se Coucher  --------------------------%%
+
+\begin{usecase}{Se Coucher}
+	
+	\begin{presentation}
+		\actor Joueur
+		\goal arrêter de jouer pour la main en cours
+		
+		\begin{precondition}
+			\condition être en train de jouer une main
+		\end{precondition}
+		
+		\begin{postcondition}
+			\condition en attente de la fin de la main courante
+		\end{postcondition}
+
+		\begin{includeuc}
+			\aucun
+		\end{includeuc}
+	\end{presentation}
+	
+	\begin{scenario}
+		\start demande à se coucher
+			\system annonce se coucher et attend la fin de la main en cours
+	\end{scenario}
+	
+	\sequencediagram{uml/usecase/FoldSequenceDiagram.pdf}
+	                {Se coucher}
+	
+\end{usecase}
+
+%%----------------------------------------------------------------------------%%
+
+%%---------------------------  USE CASE : Suivre  ----------------------------%%
+
+\begin{usecase}{Suivre}
+
+	\begin{presentation}
+		\actor Joueur
+		\goal égaliser la mise maximale actuelle au cours d'une main
+		
+		\begin{precondition}
+			\condition être en train de jouer une main
+		\end{precondition}
+		
+		\begin{postcondition}
+			\condition en attente du nouveau tour de mise (suivant ou courant à égaliser)
+		\end{postcondition}
+		
+		\begin{includeuc}
+			\aucun
+		\end{includeuc}
+	\end{presentation}
+	
+	\begin{scenario}
+		\start annonce qu'il suit la mise actuelle
+			\system vérifie que la somme est valide, fait état de l'action et attend le prochaine tour de parole
+	\end{scenario}
+	
+	\begin{alternative}
+		\nomalt ERREUR mise
+			\condition à l'étape 2, si la somme n'est pas valide
+			
+		\begin{alt}
+			\system annonce qu'il est tapis
+		\end{alt}
+	\end{alternative}
+	
+	\begin{regles}
+		\nom Le joueur possède l'argent qu'il mise
+	\end{regles}
+	
+	\sequencediagram{uml/usecase/CallingSequenceDiagram.pdf}
+	                {Suivre}
+	
+\end{usecase}
+
+%%----------------------------------------------------------------------------%%
+
+%%--------------------------  USE CASE : Relancer  ---------------------------%%
+
+\begin{usecase}{Relancer}
+	
+	\begin{presentation}
+		\actor Joueur
+		\goal augmenter la mise maximale actuelle au cours d'une main
+		
+		\begin{precondition}
+			\condition être en train de jouer une main
+		\end{precondition}
+		
+		\begin{postcondition}
+			\condition en attente du nouveau tour de mise (suivant ou courant à égaliser)
+		\end{postcondition}
+		
+		\begin{includeuc}
+			\aucun
+		\end{includeuc}
+	\end{presentation}
+	
+	\begin{scenario}
+		\start demande à relancer d'une certaine somme
+			\system vérifie que la somme est valide, fait état de la relance et attend le prochain tour de parole
+	\end{scenario}
+	
+	\begin{alternative}
+		\nomalt ERREUR mise
+			\condition à l'étape 2, si la somme n'est pas valide
+			
+		\begin{alt}
+			\system l'annonce au joueur et GOTO 1
+		\end{alt}
+	\end{alternative}
+	
+	\begin{regles}
+		\nom Validation de la mise :
+		\begin{enumerate}
+			\regle le joueur possède l'argent qu'il mise
+			\regle la somme est un multiple de la blind
+			\regle la somme est un multiple de la précédente mise
+		\end{enumerate}
+	\end{regles}
+	
+	\sequencediagram{uml/usecase/RaiseSequenceDiagram.pdf}
+	                {Relancer}
+	
+\end{usecase}
+
+%%----------------------------------------------------------------------------%%
+
+%%-------------------------  USE CASE : Faire Tapis  -------------------------%%
+
+\begin{usecase}{Faire Tapis}
+	
+	\begin{presentation}
+		\actor Joueur
+		\goal égaliser ou augmenter la mise maximale actuelle en jouant tout son argent
+		
+		\begin{precondition}
+			\condition être en train de jouer une main
+		\end{precondition}
+		
+		\begin{postcondition}
+			\condition suivant le résultat de la main, devenir spectateur ou rester joueur
+		\end{postcondition}
+		
+		\begin{includeuc}
+			\aucun
+		\end{includeuc}
+	\end{presentation}
+	
+	\begin{scenario}
+		\start demande à faire tapis 
+			\system fait état du tapis et attend le prochain tour de parole
+	\end{scenario}
+	
+	\begin{alternative}
+		\nomalt ERREUR mise
+			\condition à l'étape 2, si la somme n'est pas valide
+			
+		\begin{alt}
+			\system l'annonce au joueur et GOTO 1
+		\end{alt}
+	\end{alternative}
+	
+	\begin{regles}
+		\nom Séparation des pots
+	\end{regles}
+	
+	
+\end{usecase}
+
+%%----------------------------------------------------------------------------%%
+
+%%-------------------  USE CASE : Consulter Statistiques  --------------------%%
+
+\begin{usecase}{Consulter Statistiques}
+	
+	\begin{presentation}
+		\actor Joueur
+		\goal obtenir ses propres statistiques ainsi que celles des joueurs jouant à la table
+		
+		\begin{precondition}
+			\aucune
+		\end{precondition}
+		
+		\begin{postcondition}
+			\aucune
+		\end{postcondition}
+		
+		\begin{includeuc}
+			\aucune
+		\end{includeuc}
+	\end{presentation}
+	
+	\begin{scenario}
+		\start demande l'obtention des statistiques d'un joueur (peut-être lui-même)
+			\system lui fournit ces informations
+	\end{scenario}
+	
+	\sequencediagram{uml/usecase/StatsSequenceDiagram.pdf}
+	                {Consulter statistiques}
+	
+\end{usecase}

@@ -1,0 +1,70 @@
+\documentclass[a4paper]{report}
+
+\usepackage[french]{babel}
+
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage[avantgarde]{quotchap}
+
+\usepackage{appendix}
+
+
+\usepackage{graphicx}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+
+\usepackage[french]{minitoc}
+
+\usepackage{use_case}
+
+\setucprojectname{Bureau d'étude 2010/2011}
+
+\newenvironment{df}[1]{%
+	{%
+		\usefont{T1}{phv}{m}{sc}
+		\noindent #1 : 
+	}
+}{\newline\vspace{1em}}
+
+\title{Projet de bureau d'étude : jeu de poker multijoueur\\Cas d'utilisation}
+\author{
+	Florian \textsc{Canezin},\\
+	Matthieu \textsc{Dubet},\\
+	Marius \textsc{Moulis},\\
+	Régis \textsc{Spadotti},\\
+	Guillaume \textsc{Verdier}
+}
+\date{}
+
+
+\begin{document}
+	\maketitle
+	\clearpage
+
+	\dominitoc
+	\tableofcontents
+	
+	\chapter{Présentation du projet}
+	\input{chapters/intro}
+	
+	\chapter{Cahier de spécification}
+	\input{chapters/specification}
+	
+	\chapter{Analyse Métier}
+	\input{chapters/analyse_metier}
+	
+	
+	\chapter{Protocole de communication}
+	\input{chapters/protocole}
+	
+	\chapter{Cas d'utilisation}
+	\input{chapters/use_cases}
+	
+	\begin{appendices}
+		\chapter{Lexique}
+		\input{chapters/lexique}
+	\end{appendices}
+	
+\end{document}

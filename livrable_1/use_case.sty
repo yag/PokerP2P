@@ -1,0 +1,153 @@
+\ProvidesPackage{use_case}
+
+% Project name
+\newcommand{\ucprojectname}{My Project}
+% Redefine project name
+\newcommand{\setucprojectname}[1]{\renewcommand{\ucprojectname}{#1}}
+
+% Versioning
+\newcommand{\ucversion}{0.1}
+% Redefine version
+\newcommand{\setucversion}[1]{\renewcommand{\ucversion}{#1}}
+
+% Header du use case
+\newenvironment{usecase}[1]{%
+	\noindent\begin{tabular}{|p{.65\textwidth}|p{.30\textwidth}|}
+	\hline
+	\ucprojectname & Version : \ucversion\\
+	\hline
+	Spécification de cas d'utilisation : #1 & Date : 01/11/10 \\
+	\hline
+	\end{tabular}\\
+	\section*{%
+		\usefont{T1}{phv}{m}{b}
+		\huge Cas d'utilisation : #1
+	} \vspace{2em}
+	\addcontentsline{toc}{section}{Cas d'utilisation : #1}
+}{\cleardoublepage}
+
+% Partie présentation
+\newenvironment{presentation}{%
+	{%
+		\usefont{T1}{phv}{m}{it}
+		\huge
+		\noindent Présentation
+	} \par
+	\vspace{5pt} \hrule width \textwidth height 2pt \vspace{10pt}
+	\renewcommand\labelitemi{\textbullet}%
+	\begin{itemize}%
+}{\end{itemize}}
+
+\newcommand{\actor}{\item Acteur initiateur : }
+\newcommand{\goal}{\item But du cas : }
+% 
+% \newenvironment{precondition}{%
+% 	\item Pré-condition(s) :
+% 	\begin{itemize}%
+% }{\end{itemize}}
+\newenvironment{precondition}{%
+	\item Pré-condition(s) :
+	\begin{itemize}
+}{\end{itemize}}
+
+\newenvironment{postcondition}{%
+	\item Post-condition(s) :
+	\begin{itemize}
+}{\end{itemize}}
+
+\newcommand{\condition}{\item}
+\newcommand{\aucune}{\item[] aucune}
+\newcommand{\aucun}{\item[] aucun}
+
+\newenvironment{includeuc}{%
+	\item Cas d'utilisation inclus :
+	\begin{itemize}%
+}{\end{itemize}}
+
+%Scénario principal
+\newenvironment{scenario}{%
+	\vspace{3em}
+	{%
+		\usefont{T1}{phv}{m}{it}
+		\huge
+		\noindent Scénario principal aboutissant au succès
+	} \par
+	\vspace{5pt} \hrule width \textwidth height 2pt \vspace{10pt}
+	\begin{enumerate}
+}{\end{enumerate}}
+
+\newcommand{\start}{\item Ce cas d'utilisation commence quand l'acteur initiateur }
+\newcommand{\user}{\setlength\itemindent{0em}\item L'utilisateur  }
+\newcommand{\system}{\setlength\itemindent{2em}\item Le système }
+
+
+\newenvironment{alternative}{%
+	\vspace{3em}
+	{%
+		\usefont{T1}{phv}{m}{it}
+		\huge
+		\noindent Alternatives
+	} \par
+	\vspace{5pt} \hrule width \textwidth height 2pt \vspace{10pt}
+		
+	\renewcommand\condition{\normalsize \fontshape{n} \selectfont \item[] \textbf{Condition} : }
+		
+	\renewcommand\theenumi {\Alph{enumi}}%
+	\renewcommand\theenumii{\arabic{enumii}}
+	\renewcommand\labelenumii {\theenumi.\theenumii}
+	\begin{enumerate}%
+}{\end{enumerate}}
+
+\newenvironment{alt}{
+	\begin{enumerate}
+}{\end{enumerate}}
+
+\newcommand{\nomalt}{\large \fontshape{it} \selectfont \item}
+\newcommand{\finalt}{\item[] }
+
+\newenvironment{besoins}{%
+	\vspace{3em}
+	{%
+		\usefont{T1}{phv}{m}{it}
+		\huge
+		\noindent Besoins non fonctionnels
+	} \par
+	\vspace{5pt} \hrule width \textwidth height 2pt \vspace{10pt}
+	\begin{enumerate}
+}{\end{enumerate}}
+
+\newcommand{\frequence}{\item Fréquence}
+\newcommand{\fiabilite}{\item Fiabilité}
+\newcommand{\performance}{\item Performance}
+
+\newenvironment{regles}{%
+	\vspace{3em}
+	{%
+		\usefont{T1}{phv}{m}{it}
+		\huge
+		\noindent Règles de gestion
+	} \par
+	\vspace{5pt} \hrule width \textwidth height 2pt \vspace{10pt}
+	\begin{enumerate}
+}{\end{enumerate}}
+
+\newcommand{\nom}{\item[]}
+\newcommand{\regle}{\item}
+
+\newenvironment{ouvert}{%
+	\vspace{3em}
+	{%
+		\usefont{T1}{phv}{m}{it}
+		\huge
+		\noindent Points ouverts
+	} \par
+	\vspace{5pt} \hrule width \textwidth height 2pt \vspace{10pt}
+	\begin{enumerate}
+}{\end{enumerate}}
+
+\newcommand{\sequencediagram}[2]{%
+	\begin{figure}[ht]%
+			\centering \includegraphics[width=.75\textwidth]{#1}%
+			\caption{Cas d'utilisation : #2} 
+	\end{figure}%
+}

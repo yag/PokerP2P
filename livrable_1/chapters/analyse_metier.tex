@@ -1,0 +1,94 @@
+%!TEX root = /Users/regis/code/M1/be/projet_be.tex
+
+\section{Modélisation des processus métier}
+Afin de facilité la compréhension du diagramme d'activité, nous avons décidé de 
+le scinder en trois diagrammes compléementaires. Pour des raisons évidentes de
+mises en page, les diagrammes UML se trouve en fin de ce chapitre sur des pages
+dédiées.
+
+\subsection{Déroulement général d'une partie}
+Ce premier diagramme présente le déroulement général d'une partie. Tant qu'il 
+reste au moins deux joueurs à la table, on continue à faire des parties.
+
+\subsection{Désignation des rôles, mises obligatoires, distribution des cartes}
+Ce second diagramme explicite la phase de désignation des rôles (dealer, SB \& 
+BB), de pose des mises obligatoires (SB, BB \& \textsc{Ante}) ainsi que la 
+distribution des cartes au début de chaque partie. On notera que la distribution
+des cartes se fait dans le sens horaire, une carte par joueur, jusqu'à que 
+chaque joueur à la table est reçu ses deux cartes privatives.
+
+\subsection{Parler}
+Ce dernier diagramme détaille l'activité \textit{parler} du premier diagramme.
+Il est à noter que l'activité \textit{miser} regroupe :
+
+\begin{itemize}
+	\item suivre ou \textit{call} qui consiste à égaliser la mise précédente.
+	\item relancer ou \textit{rise} qui consiste à poser au moins le double de 
+	      la mise précédente.
+	\item miser ou \textit{bet} qui consiste à poser au moins la valeur de la 
+	      Big Blind.
+	\item passer ou \textit{check} qui est possible si aucune mise n'à été 
+	      posée et qui permet au joueur de \og temporiser \fg.
+	\item se coucher ou \textit{fold} qui consiste à jeter ses cartes et quitter 
+	      la partie en cours. Cela à pour conséquence la perte de l'intégralité 
+	      des jetons engagés par le joueur jusque là.
+\end{itemize}
+
+\subsection{Remarques générales}
+\begin{itemize}
+	\item Ces diagrammes proposent la configuration pré-flop. Si on considère 
+	      les autres tours de mise, ce sera la petite blind qui commencera à 
+	      parler.
+	\item Pour une configuration à deux joueurs, on inversera les rôles entre 
+	      Small Blind et Big Blind.
+	\item L'utilisation du joueur Lambda n'est pas anodine. Il permet de 
+	      représenter un joueur à la table qui n'a aucun rôle particulier et 
+	      donc par extention, il représente l'ensemble des autres joueurs à la 
+	      table.
+\end{itemize}
+
+\section{Modélisation du domaine métier}
+\subsection{Diagramme}
+DIAGRAMME
+\subsection{Associations}
+\begin{itemize}
+	\item En représentant la classe \textit{Mise} comme l'association entre un 
+	      \textit{Joueur} et un \textit{Tour}, on met en évidence qu'une mise 
+	       n'est possible que si un joueur \textit{mise} pendant un tour.
+	\item Une \textit{Main} n'existe que si un \textit{Croupier} 
+	      \textit{distribue} des cartes à un joueur. C'est donc pour cela que 
+	      nous représentont un la classe \textit{Main} comme une classe 
+	      associative.
+	\item Un \textit{Pot} n'est que l'accumulation de \textit{Mises} durant une 
+	      \textit{Partie} à chaque \textit{Tour}. Aucun pot ne peut donc pas 
+	      exister sant l'intéraction d'une partie et d'un ensemble de tours. 
+	      C'est donc pour cela que l'on représente un \textit{Pot} comme une 
+	      classe associative entre \textit{Tour} \& \textit{Partie}.
+\end{itemize}
+\subsection{Relations de Généralisation}
+\begin{itemize}
+	\item \textsc{Tour} est une généralisation du \textsc{Pré-Flop}, du 
+	      \textsc{Flop}, du \textsc{Turn} \& de la \textsc{River}.
+	\item \textsc{Joueur} est généralisation du \textsc{Dealer}, de la 
+	      \textsc{Small Blind}, de la \textsc{Big Blind}, et du joueur 
+	      \textsc{Lambda}. Notez que le joueur \textsc{Lambda} désigne un joueur
+	      quelconque mais différent de la \textsc{Small Blind}, de la
+	      \textsc{Big Blind}, ou encore du \textsc{Dealer}
+\end{itemize}
+
+\begin{figure}[ht]
+	\includegraphics[width=\textwidth]{uml/metier/Activite1.pdf}
+\end{figure}
+
+
+\begin{figure}[ht]
+	\centering \includegraphics[width=1.50\linewidth, angle=90]{uml/metier/Activite2.pdf}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering \includegraphics[width=1.50\linewidth, angle=90]{uml/metier/Activite3.pdf}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering \includegraphics[width=1.50\linewidth, angle=90]{uml/metier/Domaine.pdf}
+\end{figure}
