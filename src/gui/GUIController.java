@@ -2,8 +2,9 @@ package gui;
 
 import core.controller.ProtocolController;
 import core.protocol.Client;
-import core.model.ChatMessage;
-import core.model.Action;
+import core.protocol.ChatMessage;
+import core.protocol.Action;
+import core.protocol.ActionType;
 import core.Pair;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -45,13 +46,13 @@ public class GUIController implements java.io.Serializable {
 			e.printStackTrace();System.exit(1);
 		}
 	}
-	public void clientBanned(Client client) {
+	public void clientBanned(String name) {
 		try {
-			if (client.getName().equals(controller.getClient().getName())) {
+			if (name.equals(controller.getClient().getName())) {
 				System.out.println("Oops... you've been banned.");
 				controller.realLogout();
 			} else {
-				System.out.println(client.getName() + " has been banned.");
+				System.out.println(name + " has been banned.");
 			}
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
@@ -112,7 +113,7 @@ public class GUIController implements java.io.Serializable {
 		new Thread() {
 			@Override
 			public void run() {
-				ctrl.act(new Action(core.model.ActionType.FOLD, 0));
+				ctrl.act(new Action(ActionType.FOLD, 0));
 			}
 		}.start();
 	}

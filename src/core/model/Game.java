@@ -58,6 +58,7 @@ public class Game implements java.io.Serializable {
 	private int buyIn;
 	private int blindUpTime;
 	private float blindUpInc;
+	// FIXME: use java.util.Collections.synchronizedList?
 	private List<Client> players = new LinkedList<Client>();
 	private List<Client> spectators = new LinkedList<Client>();
 	private Server server;

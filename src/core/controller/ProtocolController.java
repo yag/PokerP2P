@@ -5,8 +5,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
-import core.model.Action;
-import core.model.ActionType;
 import core.model.Game;
 import core.protocol.*;
 import gui.GUIController;
@@ -21,7 +19,7 @@ public class ProtocolController {
 			if (server == null) {
 				server = (Server)LocateRegistry.getRegistry(serverhost, serverport).lookup("Server");
 			}
-			self.updateGame(server.login(java.net.InetAddress.getLocalHost().getHostAddress(), port));
+			((ClientImpl)self).setGameFrom(server.login(java.net.InetAddress.getLocalHost().getHostAddress(), port));
 			System.out.println("OK, you're logged in.");
 		} catch (java.rmi.AlreadyBoundException e) {
 			e.printStackTrace();System.exit(1);
@@ -66,9 +64,8 @@ public class ProtocolController {
 	}
 	public boolean becomePlayer() {
 		try {
-			Game game = server.becomePlayer(self);
-			if (game != null) {
-				self.updateGame(game);
+			if (server.becomePlayer(self)) {
+				((ClientImpl)self).newPlayer(self);
 				System.out.println("OK, I'm playing.");
 				return true;
 			}
@@ -80,9 +77,8 @@ public class ProtocolController {
 	}
 	public boolean becomeSpectator() {
 		try {
-			Game game = server.becomeSpectator(self);
-			if (game != null) {
-				self.updateGame(game);
+			if (server.becomeSpectator(self)) {
+				((ClientImpl)self).newSpectator(self);
 				return true;
 			}
 		} catch (RemoteException e) {

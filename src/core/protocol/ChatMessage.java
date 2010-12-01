@@ -1,6 +1,4 @@
-package core.model;
-
-import core.protocol.Client;
+package core.protocol;
 
 public class ChatMessage implements java.io.Serializable {
 	public ChatMessage(Client author, String text, int date) {

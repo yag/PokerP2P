@@ -1,5 +1,7 @@
 package core.model;
 
+import core.protocol.Card;
+
 public class Hand implements java.io.Serializable {
 	public Hand(Card c1, Card c2) {
 		card[0] = c1;

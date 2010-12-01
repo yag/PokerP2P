@@ -1,5 +1,7 @@
 package core.model;
 
+import core.protocol.Card;
+import core.protocol.RoundState;
 import core.protocol.Client;
 import java.util.List;
 import java.util.LinkedList;

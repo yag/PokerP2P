@@ -1,5 +1,7 @@
 package core.protocol;
 
+import core.Pair;
+import core.model.*;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.List;
@@ -7,48 +9,66 @@ import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
-import core.model.*;
 
 abstract class ClientsIterator {
 	public ClientsIterator(List<Client> players, List<Client> spectators) {
 		this.players = players;
 		this.spectators = spectators;
 	}
-	public void iterate() {
-		(new Thread() {
-			@Override
-			public void run() {
-				ServerImpl.lock.lock();
-				try {
+	public void iterate() throws RemoteException {
+		iterate(true) ;
+	}
+	public void iterate(boolean newThread) throws RemoteException {
+		if (newThread) {
+			(new Thread() {
+				@Override
+				public void run() {
+					ServerImpl.lock.lock();
 					try {
-						onStart();
-					} catch (RemoteException e) {
-						e.printStackTrace();System.exit(1);
-					}
-					for (Client c: players) {
 						try {
-							action(c);
+							onStart();
 						} catch (RemoteException e) {
 							e.printStackTrace();System.exit(1);
 						}
-					}
-					for (Client c: spectators) {
+						for (Client c: players) {
+							try {
+								action(c);
+							} catch (RemoteException e) {
+								e.printStackTrace();System.exit(1);
+							}
+						}
+						for (Client c: spectators) {
+							try {
+								action(c);
+							} catch (RemoteException e) {
+								e.printStackTrace();System.exit(1);
+							}
+						}
 						try {
-							action(c);
+							onEnd();
 						} catch (RemoteException e) {
 							e.printStackTrace();System.exit(1);
 						}
+					} finally {
+						ServerImpl.lock.unlock();
 					}
-					try {
-						onEnd();
-					} catch (RemoteException e) {
-						e.printStackTrace();System.exit(1);
-					}
-				} finally {
-					ServerImpl.lock.unlock();
 				}
+			}).start();
+		} else {
+			ServerImpl.lock.lock();
+			try {
+				onStart();
+				for (Client c: players) {
+					action(c);
+				}
+				for (Client c: spectators) {
+					action(c);
+				}
+				onEnd();
+			} finally {
+				ServerImpl.lock.unlock();
 			}
-		}).start();
+		}
 	}
 	protected abstract void action(Client c) throws RemoteException;
 	protected void onStart() throws RemoteException {
@@ -64,7 +84,7 @@ public class ServerImpl implements Server {
 		this.currentGame = currentGame;
 	}
 	@Override
-	public Game login(String host, int port) throws RemoteException {
+	public GameStatus login(String host, int port) throws RemoteException {
 		final Client client;
 		try {
 			client = (Client)LocateRegistry.getRegistry(host, port).lookup("Client");
@@ -80,10 +100,32 @@ public class ServerImpl implements Server {
 			@Override
 			protected void action(Client c) throws RemoteException {
 				if (!c.getName().equals(clientName))
-					c.clientLoggedIn(client, currentGame);
+					c.clientLoggedIn(client);
 			}
-		}).iterate();
-		return currentGame;
+		}).iterate(false);
+		GameStatus res = new GameStatus();
+		res.players = currentGame.getPlayers();
+		res.spectators = currentGame.getSpectators();
+		res.minNbPlayers = currentGame.getMinNbPlayers();
+		res.thinkTime = currentGame.getThinkTime();
+		res.buyIn = currentGame.getBuyIn();
+		res.blindUpTime = currentGame.getBlindUpTime();
+		res.blindUpInc = currentGame.getBlindUpInc();
+		if (currentGame.getCurrentRound() != null) {
+			Round round = currentGame.getCurrentRound();
+			res.flop = round.getFlop();
+			res.turn = round.getTurn();
+			res.river = round.getRiver();
+			res.playersCards = new LinkedList<Pair<Card, Card>>();
+			for (Hand h: round.getPlayersCards()) {
+				res.playersCards.add(new Pair<Card, Card>(h.getCard()[0], h.getCard()[1]));
+			}
+			res.currentPlayer = round.getCurrentPlayer();
+			res.dealer = round.getDealer();
+			res.state = round.getState();
+			res.pots = round.getPots();
+		}
+		return res;
 	}
 	@Override
 	public void logout(Client client) throws RemoteException {
@@ -118,22 +160,28 @@ public class ServerImpl implements Server {
 			(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 				@Override
 				protected void action(Client c) throws RemoteException {
-					c.clientLoggedOut(name, game);
+					c.clientLoggedOut(name);
 				}
-			}).iterate();
+			}).iterate(false);
 		} finally {
 			lock.unlock();
 		}
 	}
 	@Override
-	public Game becomePlayer(Client client) throws RemoteException {
+	public boolean becomePlayer(Client client) throws RemoteException {
 		if (currentGame.getCurrentRound() == null && currentGame.getPlayers().size() < Game.MAX_NB_PLAYERS) {
-			List<Client> list = currentGame.getSpectators();
-			remove(list, client); // FIXME: list.remove(client);
-			currentGame.setSpectators(list);
-			list = currentGame.getPlayers();
-			list.add(client);
-			currentGame.setPlayers(list);
+			List<Client> list;
+			lock.lock();
+			try {
+				list = currentGame.getSpectators();
+				remove(list, client); // FIXME: list.remove(client);
+				currentGame.setSpectators(list);
+				list = currentGame.getPlayers();
+				list.add(client);
+				currentGame.setPlayers(list);
+			} finally {
+				lock.unlock();
+			}
 			final Client cl = client;
 			final String clname = cl.getName();
 			final boolean start = !gameBegan && list.size () >= currentGame.getMinNbPlayers();
@@ -142,7 +190,7 @@ public class ServerImpl implements Server {
 				@Override
 				protected void action(Client c) throws RemoteException {
 					if (!c.getName().equals(clname))
-						c.clientBecamePlayer(cl, game);
+						c.clientBecamePlayer(cl);
 				}
 				@Override
 				protected void onEnd() throws RemoteException {
@@ -151,31 +199,38 @@ public class ServerImpl implements Server {
 						beginRound();
 					}
 				}
-			}).iterate();
-			return currentGame;
+			}).iterate(false);
+			return true;
 		}
-		return null;
+		return false;
 	}
 	@Override
-	public Game becomeSpectator(Client client) throws RemoteException {
+	public boolean becomeSpectator(Client client) throws RemoteException {
 		if(currentGame.getCurrentRound() == null && currentGame.getPlayers().size() > 2) {
-			List<Client> list = currentGame.getPlayers();
-			remove(list, client); // FIXME: list.remove(client);
-			currentGame.setPlayers(list);
-			list = currentGame.getSpectators();
-			list.add(client);
-			currentGame.setSpectators(list);
+			lock.lock();
+			try {
+				List<Client> list = currentGame.getPlayers();
+				remove(list, client); // FIXME: list.remove(client);
+				currentGame.setPlayers(list);
+				list = currentGame.getSpectators();
+				list.add(client);
+				currentGame.setSpectators(list);
+			} finally {
+				lock.unlock();
+			}
 			final Client cl = client;
+			final String clname = cl.getName();
 			final Game game = currentGame;
 			(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 				@Override
 				protected void action(Client c) throws RemoteException {
-					c.clientBecameSpectator(cl, game);
+					if (!c.getName().equals(clname))
+						c.clientBecameSpectator(cl);
 				}
-			}).iterate();
-			return currentGame;
+			}).iterate(false);
+			return true;
 		}
-		return null;
+		return false;
 	}
 	@Override
 	public void postChatMessage(Client client, String text) throws RemoteException {
@@ -222,7 +277,7 @@ public class ServerImpl implements Server {
 		(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 			@Override
 			protected void action(Client c) throws RemoteException {
-				c.playerActed(act, currentGame);
+				c.playerActed(act);
 			}
 			@Override
 			protected void onEnd() throws RemoteException {
@@ -233,7 +288,6 @@ public class ServerImpl implements Server {
 						(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 							@Override
 							protected void action(Client c) throws RemoteException {
-								c.updateGame(currentGame);
 								c.handEnded(null); // FIXME: list of the winners
 							}
 						}).iterate();
@@ -246,12 +300,6 @@ public class ServerImpl implements Server {
 				round.setCurrentPlayer(next);
 				System.out.println("[server] it's " + round.getCurrentPlayer().getName() + "'s turn.");
 				round.getCurrentPlayer().play();
-				(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
-					@Override
-					protected void action(Client c) throws RemoteException {
-						c.updateGame(currentGame);
-					}
-				}).iterate();
 			}
 		}).iterate();
 	}
@@ -267,8 +315,12 @@ public class ServerImpl implements Server {
 				}
 				Random rand = new Random();
 				List<Hand> hands = new LinkedList<Hand>();
+				List<Pair<Card, Card>> pcards = new LinkedList<Pair<Card, Card>>();
 				for (int i = 0, end = currentGame.getPlayers().size() ; i < end ; ++i) {
-					hands.add(new Hand(cards.remove(rand.nextInt(cards.size())), cards.remove(rand.nextInt(cards.size()))));
+					Card c1 = cards.remove(rand.nextInt(cards.size())) ;
+					Card c2 = cards.remove(rand.nextInt(cards.size())) ;
+					hands.add(new Hand(c1, c2));
+					pcards.add(new Pair<Card, Card>(c1, c2));
 				}
 				currentGame.setCurrentRound(new Round(
 						// Flop: 3 cards
@@ -286,14 +338,15 @@ public class ServerImpl implements Server {
 					System.out.println("[server] the dealer is " + currentGame.getCurrentRound().getDealer().getName());
 					currentGame.getCurrentRound().setCurrentPlayer(first);
 					List<Client> list = currentGame.getPlayers();
+					Card[] flop = currentGame.getCurrentRound().getFlop();
+					Card turn = currentGame.getCurrentRound().getTurn();
+					Card river = currentGame.getCurrentRound().getRiver();
 					for (Client c: list) {
-						c.updateGame(currentGame);
-						c.handBegan();
+						c.handBegan(flop, turn, river, pcards);
 					}
 					list = currentGame.getSpectators();
 					for (Client c: list) {
-						c.updateGame(currentGame);
-						c.handBegan();
+						c.handBegan(flop, turn, river, pcards);
 					}
 					System.out.println("[server] it's " + currentGame.getCurrentRound().getCurrentPlayer().getName() + "'s turn.");
 					first.play();
@@ -328,6 +381,7 @@ public class ServerImpl implements Server {
 		for (Iterator<Client> it = l.iterator(); it.hasNext();) {
 			if (it.next().getName().equals(name)) {
 				it.remove();
+				break;
 			}
 		}
 	}

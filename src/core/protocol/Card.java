@@ -1,4 +1,4 @@
-package core.model;
+package core.protocol;
 
 public class Card implements java.io.Serializable {
 	public Card(Value value, Suit suit) {

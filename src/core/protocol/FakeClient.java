@@ -1,8 +1,5 @@
 package core.protocol;
 
-import core.model.Action;
-import core.model.ActionType;
-import core.model.ChatMessage;
 import core.model.Game;
 import core.Pair;
 import java.rmi.RemoteException;
@@ -16,34 +13,28 @@ public class FakeClient implements Client {
 		this.game = game;
 	}
 	@Override
-	public void clientLoggedIn(Client client, Game game) throws RemoteException {
-		this.game = game;
+	public void clientLoggedIn(Client client) throws RemoteException {
 	}
 	@Override
-	public void clientLoggedOut(String name, Game game) throws RemoteException {
-		this.game = game;
+	public void clientLoggedOut(String name) throws RemoteException {
 	}
 	@Override
-	public void clientBanned(Client client, Game game) throws RemoteException {
-		this.game = game;
+	public void clientBanned(String name) throws RemoteException {
 	}
 	@Override
-	public void clientBecamePlayer(Client client, Game game) throws RemoteException {
-		this.game = game;
+	public void clientBecamePlayer(Client client) throws RemoteException {
 	}
 	@Override
-	public void clientBecameSpectator(Client client, Game game) throws RemoteException {
-		this.game = game;
+	public void clientBecameSpectator(Client client) throws RemoteException {
 	}
 	@Override
 	public void addChatMessage(ChatMessage msg) throws RemoteException {
 	}
 	@Override
-	public void playerActed(Action action, Game game) throws RemoteException {
-		this.game = game;
+	public void playerActed(Action action) throws RemoteException {
 	}
 	@Override
-	public void handBegan() throws RemoteException {
+	public void handBegan(Card[] flop, Card turn, Card river, List<Pair<Card, Card>> playersCards) throws RemoteException {
 	}
 	@Override
 	public void handEnded(List<Pair<Client, Integer>> winners) throws RemoteException {
@@ -64,8 +55,8 @@ public class FakeClient implements Client {
 		// Nothing to do
 	}
 	@Override
-	public void newServer(Game game) throws RemoteException {
-		this.game = game;
+	public void newServer(Server server) throws RemoteException {
+		game.setServer(server);
 	}
 	@Override
 	public void play() throws RemoteException {
@@ -80,10 +71,6 @@ public class FakeClient implements Client {
 				}
 			}
 		}).start();
-	}
-	@Override
-	public void updateGame(Game game) throws RemoteException {
-		this.game = game ;
 	}
 	@Override
 	public String getName() throws RemoteException {

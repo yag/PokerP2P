@@ -1,6 +1,4 @@
-package core.model;
-
-import core.protocol.Client;
+package core.protocol;
 
 public class Action implements java.io.Serializable {
 	public Action(Client player, ActionType type, int bet) {
