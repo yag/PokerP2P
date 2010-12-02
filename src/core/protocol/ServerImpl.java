@@ -133,29 +133,18 @@ public class ServerImpl implements Server {
 		lock.lock();
 		try {
 			List<Client> players = currentGame.getPlayers();
-			System.out.println("[server] " + client.getName() + " logged out.");
-			boolean isplayer = false;
-			for (Client c : players) {
-				if (c.getName().equals(client.getName())) {
-					isplayer = true;
-					break;
-				}
-			}
-			if(isplayer) {
-				if (currentGame.getCurrentRound() != null) {
-					players.set(players.indexOf(client), // FIXME
-							new FakeClient(client.getName(), client.getMoney(), client.getCurrentBet(), currentGame));
-					return;
-				} else {
-					remove(players, client);
-				}
-				currentGame.setPlayers(players);
-			} else {
-				List<Client> spectators = currentGame.getSpectators();
-				remove(spectators, client);
-				currentGame.setSpectators(spectators);
-			}
 			final String name = client.getName();
+			System.out.println("[server] " + name + " logged out.");
+			if (currentGame.getCurrentRound() != null) {
+				// Just have to replace the client with a fake
+				for (int i = 0 ; i < players.size() ; ++i) {
+					if (players.get(i).getName().equals(name)) {
+						players.set(i, new FakeClient(name, client.getMoney(), client.getCurrentBet(), currentGame));
+						return;
+					}
+				}
+			}
+			currentGame.removeClient(name);
 			final Game game = currentGame;
 			(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 				@Override
@@ -356,7 +345,7 @@ public class ServerImpl implements Server {
 			}
 		}).start();
 	}
-	public void disconnect(Client self) throws RemoteException {
+	public void disconnect() throws RemoteException {
 		int index;
 		List<Client> players = currentGame.getPlayers();
 		if (players.size() == 0) {

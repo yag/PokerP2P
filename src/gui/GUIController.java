@@ -15,36 +15,13 @@ public class GUIController implements java.io.Serializable {
 	}
 	public void clientLoggedIn(Client client) {
 		try {
-			if (client.getName().equals(controller.getClient().getName())) {
-				System.out.println("!!>logged in");
-				new Thread() {
-					@Override
-					public void run() {
-						controller.becomePlayer();
-					}
-				}.start();
-			} else {
-				System.out.println(client.getName() + " logged in.");
-			}
+			System.out.println(client.getName() + " logged in.");
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}
 	}
 	public void clientLoggedOut(String name) {
-		try {
-			if (name.equals(controller.getClient().getName())) {
-				System.out.println("!!>logged out");
-				controller.realLogout();
-			} else {
-				System.out.println(name + " logged out.");
-				if (controller.getClient().getGame().getPlayers().size() == 1) {
-					System.out.println("I'm alone, disconnecting.");
-					controller.realLogout();
-				}
-			}
-		} catch (RemoteException e) {
-			e.printStackTrace();System.exit(1);
-		}
+		System.out.println(name + " logged out.");
 	}
 	public void clientBanned(String name) {
 		try {
@@ -60,22 +37,14 @@ public class GUIController implements java.io.Serializable {
 	}
 	public void clientBecamePlayer(Client client) {
 		try {
-			if (client.getName().equals(controller.getClient().getName())) {
-				System.out.println("!!>You're playing !");
-			} else {
-				System.out.println(client.getName() + " became a player.");
-			}
+			System.out.println(client.getName() + " became a player.");
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}
 	}
 	public void clientBecameSpectator(Client client) {
 		try {
-			if (client.getName().equals(controller.getClient().getName())) {
-				System.out.println("!!>You're a spectator.");
-			} else {
-				System.out.println(client.getName() + " became a spectator.");
-			}
+			System.out.println(client.getName() + " became a spectator.");
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}
@@ -102,9 +71,12 @@ public class GUIController implements java.io.Serializable {
 		new Thread() {
 			@Override
 			public void run() {
+				try {
+					Thread.sleep(new java.util.Random().nextInt(500)); // To avoid simultaneous logout
+				} catch (InterruptedException e) {
+				}
+				System.out.println("Asking to log out.");
 				controller.logout();
-				System.out.println("OK, you've logged out");
-				controller.realLogout();
 			}
 		}.start();
 	}

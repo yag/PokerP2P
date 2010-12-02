@@ -4,6 +4,8 @@ import core.protocol.Client;
 import core.protocol.Server;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Iterator;
+import java.rmi.RemoteException;
 
 public class Game implements java.io.Serializable {
 	public Game(int minNbPlayers, int thinkTime, int buyIn, int blindUpTime, float blindUpInc) {
@@ -40,17 +42,39 @@ public class Game implements java.io.Serializable {
 	public void setPlayers(List<Client> players) {
 		this.players = players;
 	}
+	public void newPlayer(Client client) throws RemoteException {
+		remove(spectators, client.getName());
+		players.add (client);
+	}
 	public List<Client> getSpectators() {
 		return spectators;
 	}
 	public void setSpectators(List<Client> spectators) {
 		this.spectators = spectators;
 	}
+	public void newSpectator(Client client) throws RemoteException {
+		remove(players, client.getName());
+		spectators.add (client);
+	}
+	public void removeClient(String name) throws RemoteException {
+		if (!remove(spectators, name)) {
+			remove(players, name);
+		}
+	}
 	public Server getServer() {
 		return server;
 	}
 	public void setServer(Server server) {
 		this.server = server;
+	}
+	private boolean remove(List<Client> l, String name) throws RemoteException {
+		for (Iterator<Client> it = l.iterator(); it.hasNext();) {
+			if (it.next().getName().equals(name)) {
+				it.remove();
+				return true;
+			}
+		}
+		return false;
 	}
 	private Round currentRound;
 	private int minNbPlayers;

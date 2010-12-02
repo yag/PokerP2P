@@ -14,7 +14,6 @@ public class ProtocolController {
 		selfport = port;
 		self = new ClientImpl(controller, name, serverhost, serverport, port);
 		try {
-			//self = (Client)UnicastRemoteObject.exportObject(self, 0);
 			LocateRegistry.getRegistry("localhost", port).bind("Client", UnicastRemoteObject.exportObject(self, 0));
 			if (server == null) {
 				server = (Server)LocateRegistry.getRegistry(serverhost, serverport).lookup("Server");
@@ -36,6 +35,8 @@ public class ProtocolController {
 	public void logout() {
 		try {
 			server.logout(self);
+			self.getGame().removeClient(self.getName());
+			realLogout();
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}
@@ -49,7 +50,7 @@ public class ProtocolController {
 			for (int i = 0 ; i < list.length ; ++i) {
 				if (list[i].equals("Server")) {
 					System.out.println("I'm the server, removing it.");
-					server.disconnect(self);
+					server.disconnect();
 					LocateRegistry.getRegistry("localhost", selfport).unbind("Server");
 					UnicastRemoteObject.unexportObject(server, false);
 					break;
@@ -65,7 +66,7 @@ public class ProtocolController {
 	public boolean becomePlayer() {
 		try {
 			if (server.becomePlayer(self)) {
-				((ClientImpl)self).newPlayer(self);
+				self.getGame().newPlayer(self);
 				System.out.println("OK, I'm playing.");
 				return true;
 			}
@@ -78,7 +79,7 @@ public class ProtocolController {
 	public boolean becomeSpectator() {
 		try {
 			if (server.becomeSpectator(self)) {
-				((ClientImpl)self).newSpectator(self);
+				self.getGame().newSpectator(self);
 				return true;
 			}
 		} catch (RemoteException e) {

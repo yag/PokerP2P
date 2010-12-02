@@ -19,29 +19,27 @@ public class ClientImpl implements Client {
 	}
 	@Override
 	public void clientLoggedIn(Client client) throws RemoteException {
-		List<Client> spectators = game.getSpectators();
-		spectators.add(client);
-		game.setSpectators(spectators);
+		game.newSpectator(client);
 		controller.clientLoggedIn(client);
 	}
 	@Override
 	public void clientLoggedOut(String name) throws RemoteException {
-		removeClient(name);
+		game.removeClient(name);
 		controller.clientLoggedOut(name);
 	}
 	@Override
 	public void clientBanned(String name) throws RemoteException {
-		removeClient(name);
+		game.removeClient(name);
 		controller.clientBanned(name);
 	}
 	@Override
 	public void clientBecamePlayer(Client client) throws RemoteException {
-		newPlayer(client);
+		game.newPlayer(client);
 		controller.clientBecamePlayer(client);
 	}
 	@Override
 	public void clientBecameSpectator(Client client) throws RemoteException {
-		newSpectator(client);
+		game.newSpectator(client);
 		controller.clientBecameSpectator(client);
 	}
 	@Override
@@ -145,42 +143,8 @@ public class ClientImpl implements Client {
 			r.setDealer(g.dealer);
 			r.setState(g.state);
 			r.setPots(g.pots);
+			game.setCurrentRound(r);
 		}
-	}
-	public void newPlayer(Client client) throws RemoteException {
-		List<Client> l = game.getSpectators();
-		remove(l, client.getName());
-		game.setSpectators(l);
-		l = game.getPlayers();
-		l.add (client);
-		game.setPlayers(l);
-	}
-	public void newSpectator(Client client) throws RemoteException {
-		List<Client> l = game.getPlayers();
-		remove(l, client.getName());
-		game.setPlayers(l);
-		l = game.getSpectators();
-		l.add (client);
-		game.setSpectators(l);
-	}
-	private void removeClient(String name) throws RemoteException {
-		List<Client> l = game.getSpectators();
-		if (remove(l, name)) {
-			game.setSpectators(l);
-		} else {
-			l = game.getPlayers();
-			remove(l, name);
-			game.setPlayers(l);
-		}
-	}
-	private boolean remove(List<Client> l, String name) throws RemoteException {
-		for (Iterator<Client> it = l.iterator(); it.hasNext();) {
-			if (it.next().getName().equals(name)) {
-				it.remove();
-				return true;
-			}
-		}
-		return false;
 	}
 	private GUIController controller;
 	private Game game;
