@@ -25,4 +25,5 @@ public interface Client extends Remote, java.io.Serializable {
 	int getCurrentBet() throws RemoteException;
 	// Implementation specific method (not part of the protocol)
 	Game getGame() throws RemoteException;
+	void setMoney(int money) throws RemoteException ;
 }

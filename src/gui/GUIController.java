@@ -8,6 +8,8 @@ import core.protocol.ActionType;
 import core.Pair;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Scanner;
+
 
 public class GUIController implements java.io.Serializable {
 	public GUIController(ProtocolController controller) {
@@ -51,7 +53,19 @@ public class GUIController implements java.io.Serializable {
 	}
 	public void playerActed(Action action) {
 		try {
-			System.out.println(action.getPlayer().getName() + " played: " + action.getType());
+			System.out.print(action.getPlayer().getName() + " played: ") ; 
+			switch (action.getType()) {
+				case CHECK : System.out.println("CHECK") ;
+				break ;
+				case RAISE : System.out.println("RAISE de " + action.getBet()) ;
+				break ;
+				case CALL : System.out.println("CALL") ;
+				break ;
+				case FOLD : System.out.println("FOLD") ;
+				break ;
+				case SITOUT : System.out.println("SITOUT") ;
+				break ;
+			}
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}
@@ -68,24 +82,62 @@ public class GUIController implements java.io.Serializable {
 	}
 	public void handEnded(List<Pair<Client, Integer>> winners) {
 		System.out.println("The hand ended.");
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(new java.util.Random().nextInt(500)); // To avoid simultaneous logout
-				} catch (InterruptedException e) {
-				}
-				System.out.println("Asking to log out.");
-				controller.logout();
-			}
-		}.start();
+		System.out.println("The winner(s) is(are) :") ;
 	}
+	
 	public void play() {
 		final ProtocolController ctrl = controller;
 		new Thread() {
 			@Override
 			public void run() {
-				ctrl.act(new Action(ActionType.FOLD, 0));
+				Scanner scan = new Scanner(System.in);
+				int choice = 0 ;
+				int currentbet = 0 ; 
+				int currentdiff = 0 ;
+				while (choice < 1 || choice > 6) {
+					try {
+						System.out.println("Stack : " + controller.getClient().getGame().getCurrentRound().getPots().get(0)) ;
+						System.out.println("Money : " + controller.getClient().getMoney()) ;
+						for (Pair<Client,Integer> p : controller.getClient().getGame().actualPlayers) {
+							if (p.getFirst().getName().equals(controller.getClient().getName())) {
+								// Me :)
+								currentbet = p.getSecond() ;
+								break ;
+							}
+						}
+						currentdiff = controller.getClient().getGame().getCurrentMaxBet() - currentbet ;
+					} catch (RemoteException ce) {
+						//
+					}
+					System.out.print("Current bet :" + currentbet ) ;
+					System.out.println("You're turn ! \n : 1 = Raise ;\n 2 = Call ( it's going to be " + currentdiff + ");\n 3 = Check ;\n 4 = Fold ; \n5 = Sitout ;\n 6 = Logout");
+					choice = scan.nextInt();
+				}
+				switch (choice) {
+					case 1 :
+						System.out.println("Combien tu veux RAISE ? :");
+						int bet = scan.nextInt() ;
+						ctrl.act(new Action(ActionType.RAISE,bet));
+						break ;
+					case 2 :
+							ctrl.act(new Action(ActionType.CALL));
+							break ;
+					case 3 :
+						ctrl.act(new Action(ActionType.CHECK));
+						break ;
+					case 4 :
+						ctrl.act(new Action(ActionType.FOLD));
+						break ;
+					case 5 :
+						ctrl.act(new Action(ActionType.SITOUT));
+						break ;
+					case 6 :
+						//ctrl.act(new Action(ActionType.SITOUT));
+						break ;
+					default : // never happens
+					
+						
+				}
 			}
 		}.start();
 	}

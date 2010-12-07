@@ -80,6 +80,9 @@ public class FakeClient implements Client {
 	public int getMoney() throws RemoteException {
 		return money;
 	}
+	public void setMoney( int m ) throws RemoteException {
+		this.money = m ;
+	}
 	@Override
 	public void setCurrentBet(int currentBet) throws RemoteException {
 		this.currentBet = currentBet;

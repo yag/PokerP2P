@@ -10,6 +10,11 @@ public class Action implements java.io.Serializable {
 		this.type = type;
 		this.bet = bet;
 	}
+	
+	public Action(ActionType type) {
+		this.type = type ;
+		this.bet = 0 ;
+	}
 	public Client getPlayer() {
 		return player;
 	}

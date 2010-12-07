@@ -75,8 +75,8 @@ abstract class ClientsIterator {
 	}
 	protected void onEnd() throws RemoteException {
 	}
-	private final List<Client> players;
-	private final List<Client> spectators;
+	protected final List<Client> players;
+	protected final List<Client> spectators;
 }
 
 public class ServerImpl implements Server {
@@ -158,40 +158,40 @@ public class ServerImpl implements Server {
 	}
 	@Override
 	public boolean becomePlayer(Client client) throws RemoteException {
-		if (currentGame.getCurrentRound() == null && currentGame.getPlayers().size() < Game.MAX_NB_PLAYERS) {
-			List<Client> list;
-			lock.lock();
-			try {
-				list = currentGame.getSpectators();
-				remove(list, client); // FIXME: list.remove(client);
-				currentGame.setSpectators(list);
-				list = currentGame.getPlayers();
-				list.add(client);
-				currentGame.setPlayers(list);
-			} finally {
-				lock.unlock();
-			}
-			final Client cl = client;
-			final String clname = cl.getName();
-			final boolean start = !gameBegan && list.size () >= currentGame.getMinNbPlayers();
-			final Game game = currentGame;
-			(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
-				@Override
-				protected void action(Client c) throws RemoteException {
-					if (!c.getName().equals(clname))
-						c.clientBecamePlayer(cl);
-				}
-				@Override
-				protected void onEnd() throws RemoteException {
-					if (start) {
-						gameBegan = true;
-						beginRound();
-					}
-				}
-			}).iterate(false);
-			return true;
-		}
-		return false;
+                if (currentGame.getCurrentRound() == null && currentGame.getPlayers().size() < Game.MAX_NB_PLAYERS) {
+                        List<Client> list;
+                        lock.lock();
+                        try {
+                                list = currentGame.getSpectators();
+                                remove(list, client); // FIXME: list.remove(client);
+                                currentGame.setSpectators(list);
+                                list = currentGame.getPlayers();
+                                list.add(client);
+                                currentGame.setPlayers(list);
+                        } finally {
+                                lock.unlock();
+                        }
+                        final Client cl = client;
+                        final String clname = cl.getName();
+                        final boolean start = !gameBegan && list.size () >= currentGame.getMinNbPlayers();
+                        final Game game = currentGame;
+                        (new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
+                                @Override
+                                protected void action(Client c) throws RemoteException {
+                                        if (!c.getName().equals(clname))
+                                                c.clientBecamePlayer(cl);
+                                }
+                                @Override
+                                protected void onEnd() throws RemoteException {
+                                        if (start) {
+                                                gameBegan = true;
+                                                beginRound();
+                                        }
+                                }
+                        }).iterate();
+                        return true;
+                }
+                return false;
 	}
 	@Override
 	public boolean becomeSpectator(Client client) throws RemoteException {
@@ -227,71 +227,82 @@ public class ServerImpl implements Server {
 	}
 	@Override
 	public void act(Action action) throws RemoteException {
+		Client nextPlayertemp = null ;
+		try {
+			nextPlayertemp = currentGame.playerActed(action) ;
+		} catch (core.controller.CheatException ce) {
+			// Bannir
+			System.out.println("BAN") ;
+			final Action act = action;
+			(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
+					@Override
+					protected void action(Client c) throws RemoteException {
+						c.clientBanned(act.getPlayer().getName()) ;	
+					}					
+			}).iterate(false);
+			action =  new Action(action.getPlayer(), ActionType.FOLD, 0);
+			try {
+				nextPlayertemp = currentGame.playerActed(action);
+			} catch (core.controller.CheatException ce2) {
+				// Will never happen
+			}
+		}
 		final Action act = action;
-		final Round round = currentGame.getCurrentRound();
-		List<Client> players = currentGame.getPlayers();
-		boolean turnended = false;
-		int curbet = -1;
-		int nbplayers = 0;
-		int index = 0;
-		round.addToPot(action.getBet());
-		String curplayername = round.getCurrentPlayer().getName();
-		for (Client c: players) {
-			if (c.getName().equals(curplayername)) {
-				break ;
-			}
-			index += 1;
-		}
-		final Client next = players.get((index + 1) % players.size());
-		if (round.getCurrentPlayer().getName().equals(round.getDealer().getName())) {
-			turnended = true;
-			for (Client c: players) {
-				int bet = c.getCurrentBet();
-				if (bet != -1) {
-					nbplayers += 1;
-					if (curbet == -1) {
-						curbet = bet;
-					} else {
-						if (curbet != bet) {
-							turnended = false;
-							break;
-						}
-					}
-				}
-			}
-			turnended = turnended || nbplayers == 1;
-		}
-		final boolean turnendedf = turnended;
-		final int nbplayersf = nbplayers;
+		
+		final Client nextPlayer = nextPlayertemp ;
+		final Round nextRound = currentGame.getCurrentRound() ;
+		// Pour tous les joueurs/spectateurs de la table
 		(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
+			// On met à jour le statut de Game
 			@Override
 			protected void action(Client c) throws RemoteException {
 				c.playerActed(act);
 			}
 			@Override
 			protected void onEnd() throws RemoteException {
-				if (turnendedf) {
-					if (round.getState() == RoundState.RIVER || nbplayersf <= 1) {
+				if (nextPlayer == null) { // On fini le round courant si necessaire
 						System.out.println("[server] the hand is finished. The pot is " + currentGame.getCurrentRound().getPots().get(0) + ".");
 						currentGame.setCurrentRound(null);
 						(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 							@Override
 							protected void action(Client c) throws RemoteException {
+								// Send a list of the winners and the associated pots
 								c.handEnded(null); // FIXME: list of the winners
 							}
-						}).iterate();
-						return;
+						}).iterate(false);
+						// Began a new hand
+						try {
+						Thread.sleep(5000) ;
+						} catch (InterruptedException ie) {
+							//
+						}
+						int count = 0 ;
+						Client lastPlayer = null ;
+						for (Client c: currentGame.getPlayers()) {
+							if (c.getMoney() > 0) {
+								count += 1;
+								lastPlayer = c ;
+							}
+						}
+						if (count > 1) {
+							// il reste des joueurs, on lance une nouvelle main
+							beginRound() ;
+						} else {
+							// La partie est fini
+							System.out.println("Ok, la partie est fini, tout le monde est ruiné sauf le grand gagnant : " + lastPlayer.getName()) ;
+							//System.exit(0) ;// TODO , c'est la VRAI FIN, avec un gagnant ! 
+						}
+
 					} else {
-						round.setState(RoundState.values()[round.getState().ordinal() + 1]);
-						System.out.println("[server] round state is " + round.getState());
+						System.out.println("[server] round state is " + nextRound.getState());
+						System.out.println("[server] it's " + nextRound.getCurrentPlayer().getName() + "'s turn.");
+						nextRound.getCurrentPlayer().play();
 					}
-				}
-				round.setCurrentPlayer(next);
-				System.out.println("[server] it's " + round.getCurrentPlayer().getName() + "'s turn.");
-				round.getCurrentPlayer().play();
+
 			}
 		}).iterate();
 	}
+	
 	private void beginRound() {
 		(new Thread() {
 			@Override
@@ -321,8 +332,9 @@ public class ServerImpl implements Server {
 						// River
 						cards.remove(rand.nextInt(cards.size())),
 						hands));
+				currentGame.handBegan() ;
 				try {
-					Client first = currentGame.getPlayers().get(1);
+					Client first = currentGame.getPlayers().get(3%currentGame.getPlayers().size());
 					currentGame.getCurrentRound().setDealer(currentGame.getPlayers().get(0));
 					System.out.println("[server] the dealer is " + currentGame.getCurrentRound().getDealer().getName());
 					currentGame.getCurrentRound().setCurrentPlayer(first);

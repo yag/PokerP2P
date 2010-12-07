@@ -49,6 +49,11 @@ public class ClientImpl implements Client {
 	@Override
 	public void playerActed(Action action) throws RemoteException {
 		// TODO: update game
+		try {
+			game.playerActed(action) ;
+		} catch(core.controller.CheatException ce) {
+			//
+		}
 		controller.playerActed(action);
 	}
 	@Override
@@ -59,6 +64,7 @@ public class ClientImpl implements Client {
 			hands.add(new Hand(cards.getFirst(), cards.getSecond()));
 		}
 		game.setCurrentRound(new Round(flop[0], flop[1], flop[2], turn, river, hands));
+		game.handBegan();
 		controller.handBegan();
 	}
 	@Override
@@ -131,6 +137,7 @@ public class ClientImpl implements Client {
 	}
 	public void setGameFrom(GameStatus g) {
 		game = new Game(g.minNbPlayers, g.thinkTime, g.buyIn, g.blindUpTime, g.blindUpInc);
+		money = g.buyIn ;
 		game.setPlayers(new LinkedList<Client>(g.players));
 		game.setSpectators(new LinkedList<Client>(g.spectators));
 		if (g.currentPlayer != null) {
@@ -145,6 +152,10 @@ public class ClientImpl implements Client {
 			r.setPots(g.pots);
 			game.setCurrentRound(r);
 		}
+	}
+	
+	public void setMoney( int m ) throws RemoteException {
+		this.money = m ;
 	}
 	private GUIController controller;
 	private Game game;

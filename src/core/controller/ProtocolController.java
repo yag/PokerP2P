@@ -97,8 +97,8 @@ public class ProtocolController {
 	public void act(Action action) {
 		try {
 			action.setPlayer(self);
-			if (action.getType().equals(ActionType.SITOUT) || action.getType().equals(ActionType.FOLD)) {
-				self.setCurrentBet(-1);
+			if (action.getType().equals(ActionType.RAISE) || action.getType().equals(ActionType.CALL)) {
+				self.setMoney(self.getMoney() - action.getBet() );
 			}
 			server.act(action);
 		} catch (RemoteException e) {
