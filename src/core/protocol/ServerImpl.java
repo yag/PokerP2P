@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.Collections ;
+
 
 abstract class ClientsIterator {
 	public ClientsIterator(List<Client> players, List<Client> spectators) {
@@ -262,7 +264,6 @@ public class ServerImpl implements Server {
 			protected void onEnd() throws RemoteException {
 				if (nextPlayer == null) { // On fini le round courant si necessaire
 						System.out.println("[server] the hand is finished. The pot is " + currentGame.getCurrentRound().getPots().get(0) + ".");
-						currentGame.setCurrentRound(null);
 						(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 							@Override
 							protected void action(Client c) throws RemoteException {
@@ -285,7 +286,8 @@ public class ServerImpl implements Server {
 							}
 						}
 						if (count > 1) {
-							// il reste des joueurs, on lance une nouvelle main
+							// On fait une rotation pour tourner le dealer
+							Collections.rotate(currentGame.getPlayers(),1) ;
 							beginRound() ;
 						} else {
 							// La partie est fini
@@ -334,10 +336,12 @@ public class ServerImpl implements Server {
 						hands));
 				currentGame.handBegan() ;
 				try {
-					Client first = currentGame.getPlayers().get(3%currentGame.getPlayers().size());
 					currentGame.getCurrentRound().setDealer(currentGame.getPlayers().get(0));
 					System.out.println("[server] the dealer is " + currentGame.getCurrentRound().getDealer().getName());
+					
+					Client first = currentGame.getPlayers().get(3%currentGame.getPlayers().size());
 					currentGame.getCurrentRound().setCurrentPlayer(first);
+					
 					List<Client> list = currentGame.getPlayers();
 					Card[] flop = currentGame.getCurrentRound().getFlop();
 					Card turn = currentGame.getCurrentRound().getTurn();

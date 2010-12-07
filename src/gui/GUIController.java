@@ -4,6 +4,7 @@ import core.controller.ProtocolController;
 import core.protocol.Client;
 import core.protocol.ChatMessage;
 import core.protocol.Action;
+import core.protocol.Card;
 import core.protocol.ActionType;
 import core.Pair;
 import java.rmi.RemoteException;
@@ -53,17 +54,17 @@ public class GUIController implements java.io.Serializable {
 	}
 	public void playerActed(Action action) {
 		try {
-			System.out.print(action.getPlayer().getName() + " played: ") ; 
+			System.out.print(action.getPlayer().getName() + " ") ; 
 			switch (action.getType()) {
-				case CHECK : System.out.println("CHECK") ;
+				case CHECK : System.out.println("checked") ;
 				break ;
-				case RAISE : System.out.println("RAISE de " + action.getBet()) ;
+				case RAISE : System.out.println("raised to " + action.getBet()) ;
 				break ;
-				case CALL : System.out.println("CALL") ;
+				case CALL : System.out.println("called") ;
 				break ;
-				case FOLD : System.out.println("FOLD") ;
+				case FOLD : System.out.println("folded") ;
 				break ;
-				case SITOUT : System.out.println("SITOUT") ;
+				case SITOUT : System.out.println("is sitout") ;
 				break ;
 			}
 		} catch (RemoteException e) {
@@ -84,7 +85,7 @@ public class GUIController implements java.io.Serializable {
 		System.out.println("The hand ended.");
 		System.out.println("The winner(s) is(are) :") ;
 	}
-	
+
 	public void play() {
 		final ProtocolController ctrl = controller;
 		new Thread() {
@@ -94,53 +95,96 @@ public class GUIController implements java.io.Serializable {
 				int choice = 0 ;
 				int currentbet = 0 ; 
 				int currentdiff = 0 ;
+				int max = -1 ;
+				int index = 0 ;
+				int indexAll = 0 ;
 				while (choice < 1 || choice > 6) {
 					try {
-						System.out.println("Stack : " + controller.getClient().getGame().getCurrentRound().getPots().get(0)) ;
-						System.out.println("Money : " + controller.getClient().getMoney()) ;
+						final String ESC = "\033[";
+						System.out.print(ESC + "2J"); System.out.flush();
+						
 						for (Pair<Client,Integer> p : controller.getClient().getGame().actualPlayers) {
 							if (p.getFirst().getName().equals(controller.getClient().getName())) {
-								// Me :)
 								currentbet = p.getSecond() ;
 								break ;
+							} else {
+								index += 1 ;
 							}
 						}
+						for (Client c : controller.getClient().getGame().getPlayers()) {
+							if (c.getName().equals(controller.getClient().getName())) {
+								break ;
+							}
+							indexAll += 1 ;
+						}
 						currentdiff = controller.getClient().getGame().getCurrentMaxBet() - currentbet ;
+						max = controller.getClient().getGame().getCurrentMaxBet() ;
+						System.out.println("------------ You're turn --------------") ;
+						Card[] c = controller.getClient().getGame().getCurrentRound().getPlayersCards().get(indexAll).getCard() ;
+						System.out.println("Card 1 : " + c[0].getSuit() + " " + c[0].getValue() );
+						System.out.println("Card 2 : " + c[1].getSuit() + " " + c[1].getValue() );
+						if (controller.getClient().getGame().getCurrentRound().getState().ordinal() > 0) {
+							// On affiche les cartes du FLOPs
+							Card[] flop = controller.getClient().getGame().getCurrentRound().getFlop() ;
+							System.out.println("Flop 1 : " + flop[0].getSuit() + " " + flop[0].getValue() );
+							System.out.println("Flop 2 : " + flop[1].getSuit() + " " + flop[1].getValue() );
+							System.out.println("Flop 3 : " + flop[2].getSuit() + " " + flop[2].getValue() );
+						}
+						if (controller.getClient().getGame().getCurrentRound().getState().ordinal() > 1) {
+							Card turn = controller.getClient().getGame().getCurrentRound().getTurn() ;
+							System.out.println("Turn: " + turn.getSuit() + " " + turn.getValue() );
+						}
+						if (controller.getClient().getGame().getCurrentRound().getState().ordinal() > 2) {
+							Card river = controller.getClient().getGame().getCurrentRound().getRiver() ;
+							System.out.println("River: " + river.getSuit() + " " + river.getValue() );
+						}
+						System.out.println("Stack : " + controller.getClient().getGame().getCurrentRound().getPots().get(0)) ;
+						System.out.println("Money : " + controller.getClient().getMoney()) ;
 					} catch (RemoteException ce) {
 						//
 					}
-					System.out.print("Current bet :" + currentbet ) ;
-					System.out.println("You're turn ! \n : 1 = Raise ;\n 2 = Call ( it's going to be " + currentdiff + ");\n 3 = Check ;\n 4 = Fold ; \n5 = Sitout ;\n 6 = Logout");
+					if (currentbet != -1) {
+						System.out.println("Current bet :" + currentbet ) ;
+					}
+					System.out.println("1 = Raise") ;
+					if (max > 0) {
+						System.out.println("2 = Call to" + max + " (Diff: " + currentdiff);
+					} else {
+						System.out.println("2 = Check");
+					}
+					System.out.println("3 = Fold") ;
+					System.out.println("4 = Sitout") ;
+					System.out.println("5 = Logout") ;
+					System.out.println("--------------------------------------") ;
 					choice = scan.nextInt();
 				}
 				switch (choice) {
 					case 1 :
-						System.out.println("Combien tu veux RAISE ? :");
-						int bet = scan.nextInt() ;
-						ctrl.act(new Action(ActionType.RAISE,bet));
-						break ;
+					System.out.println("Combien tu veux RAISE ? :");
+					int bet = scan.nextInt() ;
+					ctrl.act(new Action(ActionType.RAISE,bet));
+					break ;
 					case 2 :
+						if (max > 0) {
 							ctrl.act(new Action(ActionType.CALL));
-							break ;
+						} else {
+							ctrl.act(new Action(ActionType.CHECK));
+						}
+					break ;
 					case 3 :
-						ctrl.act(new Action(ActionType.CHECK));
-						break ;
+					ctrl.act(new Action(ActionType.FOLD));
+					break ;
 					case 4 :
-						ctrl.act(new Action(ActionType.FOLD));
-						break ;
-					case 5 :
-						ctrl.act(new Action(ActionType.SITOUT));
-						break ;
+					ctrl.act(new Action(ActionType.SITOUT));
+					break ;
 					case 6 :
-						//ctrl.act(new Action(ActionType.SITOUT));
-						break ;
+					//ctrl.act(new Action(ActionType.SITOUT));
+					break ;
 					default : // never happens
-					
-						
 				}
 			}
-		}.start();
+			}.start();
+		}
+		private ProtocolController controller;
+		private static final long serialVersionUID = 1L;
 	}
-	private ProtocolController controller;
-	private static final long serialVersionUID = 1L;
-}
