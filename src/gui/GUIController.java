@@ -1,6 +1,7 @@
 package gui;
 
 import core.controller.ProtocolController;
+import core.model.* ;
 import core.protocol.Client;
 import core.protocol.ChatMessage;
 import core.protocol.Action;
@@ -98,10 +99,10 @@ public class GUIController implements java.io.Serializable {
 				int max = -1 ;
 				int index = 0 ;
 				int indexAll = 0 ;
-				while (choice < 1 || choice > 6) {
+				while (choice < 1 || choice > 5) {
 					try {
-						final String ESC = "\033[";
-						System.out.print(ESC + "2J"); System.out.flush();
+						//final String ESC = "\033[";
+						//System.out.print(ESC + "2J"); System.out.flush();
 						
 						for (Pair<Client,Integer> p : controller.getClient().getGame().actualPlayers) {
 							if (p.getFirst().getName().equals(controller.getClient().getName())) {
@@ -119,8 +120,9 @@ public class GUIController implements java.io.Serializable {
 						}
 						currentdiff = controller.getClient().getGame().getCurrentMaxBet() - currentbet ;
 						max = controller.getClient().getGame().getCurrentMaxBet() ;
+						Hand h = controller.getClient().getGame().getCurrentRound().getPlayersCards().get(indexAll) ;
 						System.out.println("------------ You're turn --------------") ;
-						Card[] c = controller.getClient().getGame().getCurrentRound().getPlayersCards().get(indexAll).getCard() ;
+						Card[] c = h.getCard() ;
 						System.out.println("Card 1 : " + c[0].getSuit() + " " + c[0].getValue() );
 						System.out.println("Card 2 : " + c[1].getSuit() + " " + c[1].getValue() );
 						if (controller.getClient().getGame().getCurrentRound().getState().ordinal() > 0) {
@@ -137,6 +139,7 @@ public class GUIController implements java.io.Serializable {
 						if (controller.getClient().getGame().getCurrentRound().getState().ordinal() > 2) {
 							Card river = controller.getClient().getGame().getCurrentRound().getRiver() ;
 							System.out.println("River: " + river.getSuit() + " " + river.getValue() );
+							System.out.println("Ranking : " + controller.getClient().getGame().getCurrentRound().getHandRank(h)) ;
 						}
 						System.out.println("Stack : " + controller.getClient().getGame().getCurrentRound().getPots().get(0)) ;
 						System.out.println("Money : " + controller.getClient().getMoney()) ;
@@ -153,7 +156,7 @@ public class GUIController implements java.io.Serializable {
 						System.out.println("2 = Check");
 					}
 					System.out.println("3 = Fold") ;
-					System.out.println("4 = Sitout") ;
+					//System.out.println("4 = Sitout") ;
 					System.out.println("5 = Logout") ;
 					System.out.println("--------------------------------------") ;
 					choice = scan.nextInt();
@@ -177,8 +180,8 @@ public class GUIController implements java.io.Serializable {
 					case 4 :
 					ctrl.act(new Action(ActionType.SITOUT));
 					break ;
-					case 6 :
-					//ctrl.act(new Action(ActionType.SITOUT));
+					case 5 :
+					controller.logout() ;
 					break ;
 					default : // never happens
 				}
