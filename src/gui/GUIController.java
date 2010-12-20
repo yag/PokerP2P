@@ -1,7 +1,10 @@
 package gui;
 
+import static core.notifications.NotificationCenter.defaultCenter;
+import static core.notifications.ClientNotification.*;
 import core.controller.ProtocolController;
 import core.model.* ;
+import core.notifications.UserInfo;
 import core.protocol.Client;
 import core.protocol.ChatMessage;
 import core.protocol.Action;
@@ -17,20 +20,37 @@ public class GUIController implements java.io.Serializable {
 	public GUIController(ProtocolController controller) {
 		this.controller = controller;
 	}
+	
 	public void clientLoggedIn(Client client) {
 		try {
 			System.out.println(client.getName() + " logged in.");
+			
+			//Notifications
+			defaultCenter().postNotification(clientLoggedIn, this,
+					new UserInfo().add(kPlayerName, client.getName()));
+			
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}
 	}
+	
 	public void clientLoggedOut(String name) {
 		System.out.println(name + " logged out.");
+		
+		//Notifications
+		defaultCenter().postNotification(clientLoggedOut, this,
+				new UserInfo().add(kPlayerName, name));
 	}
+	
 	public void clientBanned(String name) {
 		try {
 			if (name.equals(controller.getClient().getName())) {
 				System.out.println("Oops... you've been banned.");
+				
+				//Notifications
+				defaultCenter().postNotification(clientBanned, this,
+						new UserInfo().add(kPlayerName, name));
+				
 				controller.realLogout();
 			} else {
 				System.out.println(name + " has been banned.");
@@ -39,23 +59,41 @@ public class GUIController implements java.io.Serializable {
 			e.printStackTrace();System.exit(1);
 		}
 	}
+	
 	public void clientBecamePlayer(Client client) {
 		try {
 			System.out.println(client.getName() + " became a player.");
+			
+			//Notifications
+			defaultCenter().postNotification(clientBecamePlayer, this,
+					new UserInfo().add(kPlayerName, client.getName()));
+			
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}
 	}
+	
 	public void clientBecameSpectator(Client client) {
 		try {
 			System.out.println(client.getName() + " became a spectator.");
+			
+			//Notifications
+			defaultCenter().postNotification(clientBecameSpectator, this,
+					new UserInfo().add(kPlayerName, client.getName()));
+			
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}
 	}
+	
 	public void playerActed(Action action) {
 		try {
-			System.out.print(action.getPlayer().getName() + " ") ; 
+			System.out.print(action.getPlayer().getName() + " ") ;
+			
+			//Notification
+			defaultCenter().postNotification(playerActed, this,
+					new UserInfo().add(kPlayerName, action.getPlayer().getName()));
+			
 			switch (action.getType()) {
 				case CHECK : System.out.println("checked") ;
 				break ;
@@ -72,19 +110,36 @@ public class GUIController implements java.io.Serializable {
 			e.printStackTrace();System.exit(1);
 		}
 	}
+	
 	public void addChatMessage(ChatMessage msg) {
 		try {
 			System.out.println(msg.getAuthor().getName() + " posted " + msg.getText());
+			
+			//Notification
+			defaultCenter().postNotification(newChatMessage, this,
+					new UserInfo().add(kChatAuthor, msg.getAuthor().getName())
+					              .add(kChatMsg, msg.getText()));
+			
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}
 	}
+	
 	public void handBegan() {
 		System.out.println("A new hand begins.");
+		
+		//Notification
+		defaultCenter().postNotification(handBegan, this);
 	}
+	
 	public void handEnded(List<Pair<Client, Integer>> winners) {
 		System.out.println("The hand ended.");
 		System.out.println("The winner(s) is(are) :") ;
+		
+		//Notification
+		defaultCenter().postNotification(handEnded, this,
+				new UserInfo().add(kWinnersList, winners));
+		
 	}
 
 	public void play() {
