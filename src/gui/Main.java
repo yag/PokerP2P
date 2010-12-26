@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 public class Main {
 	public static void main(String[] args) {
+        TestNotification testNotification = new TestNotification();
 		Scanner scan = new Scanner(System.in);
 		System.out.println("What do you want to do?");
 		System.out.println("1- Become Server 2- Become Client 3-Quit");
