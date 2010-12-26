@@ -28,7 +28,7 @@ public class Main {
 			break;
 		case 2:
 			System.out.println("Please enter: your name, the server's host, the server's port and your port.");
-			controller.login(selfcontroller, scan.next(), scan.next(), scan.nextInt(), scan.nextInt());
+			controller.login(selfcontroller, scan.next(), "localhost" , scan.nextInt(), scan.nextInt());
 			System.out.println("Asking to become a player...");
 			controller.becomePlayer();
 			break;

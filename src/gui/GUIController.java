@@ -82,16 +82,26 @@ public class GUIController implements java.io.Serializable {
 	public void handBegan() {
 		System.out.println("A new hand begins.");
 	}
-	public void handEnded(List<Pair<Client, Integer>> winners) {
+	public void handEnded(List<Pair<List<Client>, Integer>> winners) throws RemoteException{
 		System.out.println("The hand ended.");
-		System.out.println("The winner(s) is(are) :") ;
+		int i = 0 ;
+		for (Pair<List<Client>,Integer> p : winners) {
+			System.out.println("The pot n°" + (i+1) + " is winned by :") ;
+			int j = 0 ;
+			for (Client c : p.getFirst()) {
+				System.out.println(p.getFirst().get(j).getName() + " : " + ( p.getSecond() / p.getFirst().size() ) + " $$$$") ;
+				j++ ;
+			}
+			i++ ;
+		}
 	}
 
 	public void play() {
 		final ProtocolController ctrl = controller;
 		new Thread() {
 			@Override
-			public void run() {
+			public void run(){
+				try {
 				Scanner scan = new Scanner(System.in);
 				int choice = 0 ;
 				int currentbet = 0 ; 
@@ -99,77 +109,101 @@ public class GUIController implements java.io.Serializable {
 				int max = -1 ;
 				int index = 0 ;
 				int indexAll = 0 ;
+				int money = controller.getClient().getMoney() ;
+				
 				while (choice < 1 || choice > 5) {
-					try {
 						//final String ESC = "\033[";
 						//System.out.print(ESC + "2J"); System.out.flush();
-						
-						for (Pair<Client,Integer> p : controller.getClient().getGame().actualPlayers) {
-							if (p.getFirst().getName().equals(controller.getClient().getName())) {
+						Game g = controller.getClient().getGame() ;
+						Round r = g.getCurrentRound() ;
+						String name = controller.getClient().getName() ;
+						for (Pair<Client,Integer> p : r.getActualPlayers()) {
+							if (p.getFirst().getName().equals(name)) {
 								currentbet = p.getSecond() ;
 								break ;
 							} else {
 								index += 1 ;
 							}
 						}
-						for (Client c : controller.getClient().getGame().getPlayers()) {
-							if (c.getName().equals(controller.getClient().getName())) {
+						for (Client c : g.getPlayers()) {
+							if (c.getName().equals(name)) {
 								break ;
 							}
 							indexAll += 1 ;
 						}
-						currentdiff = controller.getClient().getGame().getCurrentMaxBet() - currentbet ;
-						max = controller.getClient().getGame().getCurrentMaxBet() ;
-						Hand h = controller.getClient().getGame().getCurrentRound().getPlayersCards().get(indexAll) ;
+						
+						max = g.getCurrentMaxBet() ;
+						currentdiff = max - currentbet ;
+						Hand h = r.getPlayersCards().get(indexAll) ;
+						
 						System.out.println("------------ You're turn --------------") ;
 						Card[] c = h.getCard() ;
 						System.out.println("Card 1 : " + c[0].getSuit() + " " + c[0].getValue() );
 						System.out.println("Card 2 : " + c[1].getSuit() + " " + c[1].getValue() );
-						if (controller.getClient().getGame().getCurrentRound().getState().ordinal() > 0) {
+						int allow = r.getState().ordinal() ; // it's the current state (preflop, turn ..)
+						if (allow > 0) {
 							// On affiche les cartes du FLOPs
-							Card[] flop = controller.getClient().getGame().getCurrentRound().getFlop() ;
+							Card[] flop = r.getFlop() ;
 							System.out.println("Flop 1 : " + flop[0].getSuit() + " " + flop[0].getValue() );
 							System.out.println("Flop 2 : " + flop[1].getSuit() + " " + flop[1].getValue() );
 							System.out.println("Flop 3 : " + flop[2].getSuit() + " " + flop[2].getValue() );
 						}
-						if (controller.getClient().getGame().getCurrentRound().getState().ordinal() > 1) {
-							Card turn = controller.getClient().getGame().getCurrentRound().getTurn() ;
+						if (allow > 1) {
+							Card turn = r.getTurn() ;
 							System.out.println("Turn: " + turn.getSuit() + " " + turn.getValue() );
 						}
-						if (controller.getClient().getGame().getCurrentRound().getState().ordinal() > 2) {
-							Card river = controller.getClient().getGame().getCurrentRound().getRiver() ;
+						if (allow > 2) {
+							Card river = r.getRiver() ;
 							System.out.println("River: " + river.getSuit() + " " + river.getValue() );
-							System.out.println("Ranking : " + controller.getClient().getGame().getCurrentRound().getHandRank(h)) ;
+							System.out.println("Ranking : " + r.getHandRank(h)) ;
 						}
-						System.out.println("Stack : " + controller.getClient().getGame().getCurrentRound().getPots().get(0)) ;
-						System.out.println("Money : " + controller.getClient().getMoney()) ;
-					} catch (RemoteException ce) {
-						//
-					}
+						System.out.println("Stack : " + r.getPots().get(0).getSecond()) ;
+						System.out.println("Money : " + money) ;
+
 					if (currentbet != -1) {
 						System.out.println("Current bet :" + currentbet ) ;
 					}
-					System.out.println("1 = Raise") ;
-					if (max > 0) {
-						System.out.println("2 = Call to" + max + " (Diff: " + currentdiff);
+					
+					if (money > 0) {
+						System.out.println("1 = Raise") ;
+						if (max > 0) {
+							if (max >= money) {
+								System.out.println("2 = Call to " + max + ", so you're ALLIN !") ;
+							} else {
+								System.out.println("2 = Call to" + max + " || the diff is " + currentdiff);
+							}
+						} else {
+							System.out.println("2 = Check");
+						}
+						System.out.println("3 = Fold") ;
+						//System.out.println("4 = Sitout") ;
+						System.out.println("5 = Logout") ;
+						System.out.println("--------------------------------------") ;
+						choice = scan.nextInt();
 					} else {
-						System.out.println("2 = Check");
+						// we're allin
+						System.out.println("You're All In") ;
 					}
-					System.out.println("3 = Fold") ;
-					//System.out.println("4 = Sitout") ;
-					System.out.println("5 = Logout") ;
-					System.out.println("--------------------------------------") ;
-					choice = scan.nextInt();
 				}
+				
 				switch (choice) {
 					case 1 :
 					System.out.println("Combien tu veux RAISE ? :");
 					int bet = scan.nextInt() ;
-					ctrl.act(new Action(ActionType.RAISE,bet));
+					if (bet > money) {
+						System.out.println("On te met ALLIN avec une mise de " + money) ;
+						ctrl.act(new Action(ActionType.ALLIN,money));
+					} else {
+						ctrl.act(new Action(ActionType.RAISE,bet));
+					}
 					break ;
 					case 2 :
 						if (max > 0) {
-							ctrl.act(new Action(ActionType.CALL));
+							if (max >= money) {
+								ctrl.act(new Action(ActionType.ALLIN,money));
+							} else {
+								ctrl.act(new Action(ActionType.CALL,currentdiff));
+							}
 						} else {
 							ctrl.act(new Action(ActionType.CHECK));
 						}
@@ -185,8 +219,15 @@ public class GUIController implements java.io.Serializable {
 					break ;
 					default : // never happens
 				}
+			
+			} catch (RemoteException ce) {
+				//
 			}
+			}
+			
 			}.start();
+			
+			
 		}
 		private ProtocolController controller;
 		private static final long serialVersionUID = 1L;

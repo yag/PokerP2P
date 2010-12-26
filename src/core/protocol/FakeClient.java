@@ -37,7 +37,7 @@ public class FakeClient implements Client {
 	public void handBegan(Card[] flop, Card turn, Card river, List<Pair<Card, Card>> playersCards) throws RemoteException {
 	}
 	@Override
-	public void handEnded(List<Pair<Client, Integer>> winners) throws RemoteException {
+	public void handEnded(List<Pair<List<Client>, Integer>> winners) throws RemoteException {
 		final Client self = this;
 		(new Thread() {
 			public void run() {

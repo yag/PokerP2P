@@ -234,7 +234,6 @@ public class ServerImpl implements Server {
 			nextPlayertemp = currentGame.playerActed(action) ;
 		} catch (core.controller.CheatException ce) {
 			// Bannir
-			System.out.println("BAN") ;
 			final Action act = action;
 			(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 					@Override
@@ -263,12 +262,11 @@ public class ServerImpl implements Server {
 			@Override
 			protected void onEnd() throws RemoteException {
 				if (nextPlayer == null) { // On fini le round courant si necessaire
-						System.out.println("[server] the hand is finished. The pot is " + currentGame.getCurrentRound().getPots().get(0) + ".");
+						System.out.println("[server] the hand is finished") ;
 						(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 							@Override
 							protected void action(Client c) throws RemoteException {
-								// Send a list of the winners and the associated pots
-								c.handEnded(null); // FIXME: list of the winners
+								c.handEnded(currentGame.getCurrentRound().getWinners());
 							}
 						}).iterate(false);
 						// Began a new hand

@@ -68,7 +68,7 @@ public class ClientImpl implements Client {
 		controller.handBegan();
 	}
 	@Override
-	public void handEnded(List<Pair<Client, Integer>> winners) throws RemoteException {
+	public void handEnded(List<Pair<List<Client>, Integer>> winners) throws RemoteException {
 		game.setCurrentRound(null);
 		controller.handEnded(winners);
 	}

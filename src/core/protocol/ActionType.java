@@ -5,5 +5,6 @@ public enum ActionType {
 	CALL,
 	RAISE,
 	CHECK,
+	ALLIN,
 	SITOUT
 }

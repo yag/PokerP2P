@@ -95,7 +95,7 @@ public class Game implements java.io.Serializable {
 		int index = 0 ;
 		int money = 0 ;
 		Pair<Client,Integer> player ;
-		for (Pair<Client,Integer> p: actualPlayers) {
+		for (Pair<Client,Integer> p: currentRound.getActualPlayers()) {
 			if (p.getFirst().getName().equals(curplayername)) {
 				current = p.getSecond() ;
 				money = p.getFirst().getMoney() ;
@@ -103,7 +103,9 @@ public class Game implements java.io.Serializable {
 			}
 			index += 1;
 		}
-		player = actualPlayers.get(index) ;
+		
+		player = currentRound.getActualPlayers().get(index) ;
+		
 		// On cherche le pari max actuel
 		int max = getCurrentMaxBet() ;
 		
@@ -112,30 +114,33 @@ public class Game implements java.io.Serializable {
 		// On prend l'action en compte
 		switch (act.getType()) {
 			case RAISE :
-				if (act.getBet() < max || act.getBet() - player.getSecond() > money ) {
+			/*	if ( ( act.getBet() + player.getSecond() ) < max ||  act.getBet() > money ) {
 					throw new CheatException() ;
 				}
+                                */
 				currentRound.addToPot(act.getBet()) ;
-				player.setSecond(act.getBet() + player.getSecond()) ; // on ajoute
-				nextPlayer = actualPlayers.get((index+1)%actualPlayers.size()).getFirst() ;
+				player.setSecond(act.getBet() + current) ; // on ajoute
+				// Don't call this ! It's a trap !
+                                //
+                                //player.getFirst().setMoney(money - act.getBet()) ;
+				nextPlayer = currentRound.getActualPlayers().get((index+1)%currentRound.getActualPlayers().size()).getFirst() ;
 				break ;
 				
 			case FOLD :
-				actualPlayers.remove(index) ;
-				nextPlayer = actualPlayers.get((index)%actualPlayers.size()).getFirst() ;
+				currentRound.getActualPlayers().remove(index) ;
+				nextPlayer = currentRound.getActualPlayers().get((index)%currentRound.getActualPlayers().size()).getFirst() ;
 				break ;
 					
 			case CHECK :
 			 	// pour checker, il faut que tous les joueurs ait checké (ou n'est pas encore parlé)
 				if (max >  0 || player.getSecond() > -1 ) {
 					throw new CheatException() ;
-				}
+                                }
 				player.setSecond(0) ;
-				nextPlayer = actualPlayers.get((index+1)%actualPlayers.size()).getFirst() ;
+				nextPlayer = currentRound.getActualPlayers().get((index+1)%currentRound.getActualPlayers().size()).getFirst() ;
 				break ;
 				
 			case CALL :
-
 			// On verifie si il a assez d'argent
 			if ((max-current) > money) {
 					// il a parie plus qu'il ne possede -> triche
@@ -144,13 +149,28 @@ public class Game implements java.io.Serializable {
 			// On met à jour la liste
 			player.setSecond(max) ;
 			currentRound.addToPot(max - current) ;
-			nextPlayer = actualPlayers.get((index+1)%actualPlayers.size()).getFirst() ;
+			nextPlayer = currentRound.getActualPlayers().get((index+1)%currentRound.getActualPlayers().size()).getFirst() ;
 			break ;
 			
 			case SITOUT :
-			actualPlayers.remove(index) ;
-			nextPlayer = actualPlayers.get((index)%actualPlayers.size()).getFirst() ;
-			break ;			
+				currentRound.getActualPlayers().remove(index) ;
+				nextPlayer = currentRound.getActualPlayers().get((index)%currentRound.getActualPlayers().size()).getFirst() ;
+				break ;	
+			
+			case ALLIN :
+				if ((max-current) >= money) {
+					// it's a call without enough money
+					// on doit creer un pot secondaire
+					
+				} else {
+					player.setSecond(current + money) ;
+					currentRound.addToPot(money) ;
+				}
+				nextPlayer = currentRound.getActualPlayers().get((index+1)%currentRound.getActualPlayers().size()).getFirst() ;
+				break ;
+				
+			default :
+				// never happen
 		}
 
 		/* y'a t'il un joueur suivant qui doit parler ?
@@ -158,7 +178,7 @@ public class Game implements java.io.Serializable {
 		est-ce la fin du tour ?
 		*/
 		
-		if (actualPlayers.size() <= 1) {
+		if (currentRound.getActualPlayers().size() <= 1) {
 			// Le round est fini car il n'ya plus q'un joueur, il y a un gagnant
 			return null ;
 		} else if ((currentRound.getState() == RoundState.RIVER) && endOfSpeak()) {
@@ -167,13 +187,13 @@ public class Game implements java.io.Serializable {
 		} else if ( endOfSpeak() ) {
 			// Le round continue, on passe au tour de parole suivant
 			currentRound.setState(RoundState.values()[currentRound.getState().ordinal() + 1]) ;
-			currentRound.setCurrentPlayer(actualPlayers.get(0).getFirst()) ;
+			currentRound.setCurrentPlayer(currentRound.getActualPlayers().get(0).getFirst()) ;
 			// On remet les paris à -1 pour le tour suivant
-			for (Pair<Client,Integer> p : actualPlayers) {
+			for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
 				//currentRound.addToPot(p.getSecond()) ;
 				p.setSecond(-1) ;
 			}
-			return actualPlayers.get(0).getFirst() ;
+			return currentRound.getActualPlayers().get(0).getFirst() ;
 		} else {
 			currentRound.setCurrentPlayer(nextPlayer) ;
 			
@@ -189,7 +209,7 @@ public class Game implements java.io.Serializable {
 		boolean allMax = true ;
 		int max = 0 ;
 		// D'abord on teste si tout les joeurs présents on check .
-		for (Pair<Client,Integer> p : actualPlayers) {
+		for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
 			int current = p.getSecond() ;
 			if (current == -1) {
 				return false ;
@@ -200,7 +220,7 @@ public class Game implements java.io.Serializable {
 				} 
 			}
 		}
-		for (Pair<Client,Integer> p : actualPlayers) {
+		for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
 			if (p.getSecond() != max) {
 				allMax = false ;
 			}
@@ -210,7 +230,7 @@ public class Game implements java.io.Serializable {
 	
 	public int getCurrentMaxBet() {
 		int max = -1 ;
-		for (Pair<Client,Integer> p: actualPlayers) {
+		for (Pair<Client,Integer> p: currentRound.getActualPlayers()) {
 			if (p.getSecond() > max) {
 				max = p.getSecond() ;
 			}
@@ -219,11 +239,11 @@ public class Game implements java.io.Serializable {
 	}
 	
 	public void handBegan() {
-		actualPlayers = new LinkedList<Pair<Client, Integer>>();
+		currentRound.setActualPlayers(new LinkedList<Pair<Client, Integer>>()) ;
 		for (Client c: players) {
-			actualPlayers.add(new Pair<Client, Integer>(c, -1));
+			currentRound.getActualPlayers().add(new Pair<Client, Integer>(c, -1));
 		}
-		Collections.rotate(actualPlayers,-3) ;
+		Collections.rotate(currentRound.getActualPlayers(),-3) ;
 	}
 	
 	private Round currentRound;
@@ -234,7 +254,6 @@ public class Game implements java.io.Serializable {
 	private float blindUpInc;
 	// FIXME: use java.util.Collections.synchronizedList?
 	private List<Client> players = new LinkedList<Client>();
-	public List<Pair<Client,Integer>> actualPlayers;
 	private List<Client> spectators = new LinkedList<Client>();
 	private Server server;
 	public static final int MAX_NB_PLAYERS = 10;

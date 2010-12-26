@@ -1,6 +1,7 @@
 package core.model;
 
 import core.protocol.Card;
+import core.Pair ;
 import core.protocol.RoundState;
 import core.protocol.Client;
 import core.protocol.Value;
@@ -15,7 +16,9 @@ public class Round implements java.io.Serializable {
 		turn = t;
 		river = r;
 		playersCards = p;
-		pots.add(0);
+		actualPlayers = null ; 
+		pots.add(new Pair<List<Client>,Integer>(null,0)) ;
+	
 	}
 	public Card[] getFlop() {
 		return flop;
@@ -28,6 +31,12 @@ public class Round implements java.io.Serializable {
 	}
 	public List<Hand> getPlayersCards() {
 		return playersCards;
+	}
+	public List<Pair<Client,Integer>> getActualPlayers() {
+		return actualPlayers ;
+	}
+	public void setActualPlayers(List<Pair<Client,Integer>> actualPlayers) {
+		this.actualPlayers = actualPlayers ;
 	}
 	public Client getCurrentPlayer() {
 		return currentPlayer;
@@ -47,14 +56,36 @@ public class Round implements java.io.Serializable {
 	public void setState(RoundState state) {
 		this.state = state;
 	}
-	public List<Integer> getPots() {
+	public List<Pair<List<Client>,Integer>> getPots() {
 		return pots;
 	}
-	public void setPots(List<Integer> pots) {
+	public void setPots(List<Pair<List<Client>,Integer>> pots) {
 		this.pots = pots;
 	}
 	public void addToPot(int bet) {
-		pots.set(pots.size() - 1, pots.get(pots.size() - 1) + bet);
+		int n = pots.size() - 1 ;
+		pots.get(n).setSecond( pots.get(n).getSecond() + bet) ;
+	}
+	
+	public List<Pair<List<Client>,Integer>> getWinners() {
+		/* Takes no arguments : he already has the pots ! 
+		Return for each pot, the list of the winners (in case of equality) and the amount of money */
+                List<Pair<List<Client>,Integer>> win  = new LinkedList<Pair<List<Client>,Integer>>() ;
+                for ( Pair<List<Client>,Integer> p : pots ) {                       
+					List<Client> winners = getPotWinners(p) ;
+					int nb = winners.size() ;
+					win.add(winners,p.getSecond()/nb) ;
+                }
+                return win ;
+        }
+	
+	
+	public static List<Client> getPotWinners( Pair<List<Client>,Integer> pot) {
+		List<Client> winners = new LinkedList<Client>() ;
+		
+		Client current_winner = pot.getFirst().get(0) ;
+		
+		return winners; 
 	}
 	
 	public static Card[] getBestCards(Card[] h1, Card[] h2) {
@@ -63,13 +94,9 @@ public class Round implements java.io.Serializable {
 		Ranking r2 = getRank(h2) ;
 		
 		if (r1.ordinal() > r2.ordinal()) {
-			System.out.println("------ Card 1 ---------") ; 
-			
-			//return h1 ;
+			return h1 ;
 		} else if (r1.ordinal() < r2.ordinal()) {
-			System.out.println("------ Card 2 ---------") ; 
-			
-			//return h2 ;
+			return h2 ;
 		} else {
 			//Equal , we have to check each case
 			int b1 = getBestCard(h1).getValue().ordinal() ;
@@ -141,12 +168,12 @@ public class Round implements java.io.Serializable {
 			return 0 ;
 		} else {
 			// Remove best card, and recursif call
-			return isStraight(removeBestCards(cards)) ;
+			return isStraight(removeBestCard(cards)) ;
 		}
 		
 	}
 	
-	public static Card[] removeBestCards(Card[] cards) {
+	public static Card[] removeBestCard(Card[] cards) {
 		int lg=0 ;
 		for (Card c : cards) {
 			if (c != getBestCard(cards)) {
@@ -265,8 +292,11 @@ public class Round implements java.io.Serializable {
 	private Card river;
 	private List<Hand> playersCards;
 	private Client currentPlayer;
+	public List<Pair<Client,Integer>> actualPlayers;
 	private Client dealer;
 	private RoundState state = RoundState.PREFLOP;
-	private List<Integer> pots = new LinkedList<Integer>();
+	
+	// a list of the differents pots with for each, players in it and money
+	private List<Pair<List<Client>,Integer>> pots = new LinkedList<Pair<List<Client>,Integer>>();
 	private static final long serialVersionUID = 1L;
 }

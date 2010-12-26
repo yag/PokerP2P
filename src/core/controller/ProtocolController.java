@@ -97,10 +97,10 @@ public class ProtocolController {
 	public void act(Action action) {
 		try {
 			action.setPlayer(self);
-			if (action.getType().equals(ActionType.RAISE) || action.getType().equals(ActionType.CALL)) {
+			if (action.getType().equals(ActionType.RAISE) || action.getType().equals(ActionType.CALL) || action.getType().equals(ActionType.ALLIN) ) {
 				self.setMoney(self.getMoney() - action.getBet() );
-			}
-			server.act(action);
+                        }
+                        server.act(action);
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}
