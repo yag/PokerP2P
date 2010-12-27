@@ -263,6 +263,12 @@ public class ServerImpl implements Server {
 			protected void onEnd() throws RemoteException {
 				if (nextPlayer == null) { // On fini le round courant si necessaire
 						System.out.println("[server] the hand is finished") ;
+						// On donne l'argent aux gagnants
+						for (Pair<List<Client>,Integer> p : currentGame.getCurrentRound().getWinners()) {
+							for (Client cl : p.getFirst()) {
+								cl.setMoney( cl.getMoney() + (p.getSecond()/p.getFirst().size())) ;
+							}
+						}
 						(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 							@Override
 							protected void action(Client c) throws RemoteException {
@@ -270,11 +276,6 @@ public class ServerImpl implements Server {
 							}
 						}).iterate(false);
 						// Began a new hand
-						try {
-						Thread.sleep(5000) ;
-						} catch (InterruptedException ie) {
-							//
-						}
 						int count = 0 ;
 						Client lastPlayer = null ;
 						for (Client c: currentGame.getPlayers()) {
@@ -284,6 +285,16 @@ public class ServerImpl implements Server {
 							}
 						}
 						if (count > 1) {
+							// On vire les joueurs qui n'ont plus d'argent
+							(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
+								@Override
+								protected void action(Client c) throws RemoteException {
+									if (c.getMoney() == 0 ) {
+										System.out.println("[server] " + c + "has no money, logout !") ;
+										logout(c) ;
+									}
+								}
+							}).iterate(true);
 							// On fait une rotation pour tourner le dealer
 							Collections.rotate(currentGame.getPlayers(),1) ;
 							beginRound() ;

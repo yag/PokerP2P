@@ -114,16 +114,12 @@ public class Game implements java.io.Serializable {
 		// On prend l'action en compte
 		switch (act.getType()) {
 			case RAISE :
-			/*	if ( ( act.getBet() + player.getSecond() ) < max ||  act.getBet() > money ) {
+				if (  ( act.getBet() + player.getSecond() ) < max) {
 					throw new CheatException() ;
 				}
-                                */
 				currentRound.addToPot(act.getBet()) ;
 				player.setSecond(act.getBet() + current) ; // on ajoute
-				// Don't call this ! It's a trap !
-                                //
-                                //player.getFirst().setMoney(money - act.getBet()) ;
-				nextPlayer = currentRound.getActualPlayers().get((index+1)%currentRound.getActualPlayers().size()).getFirst() ;
+				nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
 				break ;
 				
 			case FOLD :
@@ -135,42 +131,34 @@ public class Game implements java.io.Serializable {
 			 	// pour checker, il faut que tous les joueurs ait checké (ou n'est pas encore parlé)
 				if (max >  0 || player.getSecond() > -1 ) {
 					throw new CheatException() ;
-                                }
+                }
 				player.setSecond(0) ;
-				nextPlayer = currentRound.getActualPlayers().get((index+1)%currentRound.getActualPlayers().size()).getFirst() ;
+				nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
 				break ;
 				
 			case CALL :
-			// On verifie si il a assez d'argent
 			if ((max-current) > money) {
-					// il a parie plus qu'il ne possede -> triche
-					throw new CheatException() ;
-			}
+				// Allin , on cree l'ancien pot
+				List<Client> lc = new LinkedList<Client>() ;
+				for (Pair<Client,Integer> p : getCurrentRound().getActualPlayers()) {
+					lc.add(p.getFirst()) ;
+				}
+				Pair<List<Client>,Integer> new_pot = new Pair<List<Client>,Integer>(lc,0) ;
+				getCurrentRound().getPots().add(new_pot) ;
+				// on supprime le joueur jusqu'à la fin du round
+				//currentRound.getActualPlayers().remove(index) ;
+			} else {
 			// On met à jour la liste
 			player.setSecond(max) ;
 			currentRound.addToPot(max - current) ;
-			nextPlayer = currentRound.getActualPlayers().get((index+1)%currentRound.getActualPlayers().size()).getFirst() ;
+			}
+			nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
 			break ;
 			
 			case SITOUT :
 				currentRound.getActualPlayers().remove(index) ;
 				nextPlayer = currentRound.getActualPlayers().get((index)%currentRound.getActualPlayers().size()).getFirst() ;
 				break ;	
-			
-			case ALLIN :
-				if ((max-current) >= money) {
-					// it's a call without enough money
-					// on doit creer un pot secondaire
-					
-				} else {
-					player.setSecond(current + money) ;
-					currentRound.addToPot(money) ;
-				}
-				nextPlayer = currentRound.getActualPlayers().get((index+1)%currentRound.getActualPlayers().size()).getFirst() ;
-				break ;
-				
-			default :
-				// never happen
 		}
 
 		/* y'a t'il un joueur suivant qui doit parler ?
@@ -180,11 +168,12 @@ public class Game implements java.io.Serializable {
 		
 		if (currentRound.getActualPlayers().size() <= 1) {
 			// Le round est fini car il n'ya plus q'un joueur, il y a un gagnant
-			return null ;
+			return  null ;
 		} else if ((currentRound.getState() == RoundState.RIVER) && endOfSpeak()) {
 			// Le round est fini car on est à la river et tout le monde a parle
 			return null ;
 		} else if ( endOfSpeak() ) {
+			System.out.println("fdfdf") ;
 			// Le round continue, on passe au tour de parole suivant
 			currentRound.setState(RoundState.values()[currentRound.getState().ordinal() + 1]) ;
 			currentRound.setCurrentPlayer(currentRound.getActualPlayers().get(0).getFirst()) ;
@@ -195,8 +184,12 @@ public class Game implements java.io.Serializable {
 			}
 			return currentRound.getActualPlayers().get(0).getFirst() ;
 		} else {
-			currentRound.setCurrentPlayer(nextPlayer) ;
 			
+			while (nextPlayer.getMoney() == 0 ) {
+				System.out.println(index) ;
+				nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
+			}
+			currentRound.setCurrentPlayer(nextPlayer) ;
 			// On continue le tour de parole
 			return nextPlayer ;
 		}
@@ -207,6 +200,7 @@ public class Game implements java.io.Serializable {
 		Client dealer = currentRound.getDealer() ;
 		boolean allChecked = true ;
 		boolean allMax = true ;
+
 		int max = 0 ;
 		// D'abord on teste si tout les joeurs présents on check .
 		for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
@@ -221,7 +215,8 @@ public class Game implements java.io.Serializable {
 			}
 		}
 		for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
-			if (p.getSecond() != max) {
+			if (p.getSecond() != max && p.getSecond() != 0) {
+				// we don't count the allin
 				allMax = false ;
 			}
 		}

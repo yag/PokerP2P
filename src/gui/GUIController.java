@@ -223,7 +223,7 @@ public class GUIController implements java.io.Serializable {
 							if (max >= money) {
 								System.out.println("2 = Call to " + max + ", so you're ALLIN !") ;
 							} else {
-								System.out.println("2 = Call to" + max + " || the diff is " + currentdiff);
+								System.out.println("2 = Call to " + max + " || the diff is " + currentdiff);
 							}
 						} else {
 							System.out.println("2 = Check");
@@ -245,7 +245,7 @@ public class GUIController implements java.io.Serializable {
 					int bet = scan.nextInt() ;
 					if (bet > money) {
 						System.out.println("On te met ALLIN avec une mise de " + money) ;
-						ctrl.act(new Action(ActionType.ALLIN,money));
+						ctrl.act(new Action(ActionType.RAISE,money));
 					} else {
 						ctrl.act(new Action(ActionType.RAISE,bet));
 					}
@@ -253,7 +253,7 @@ public class GUIController implements java.io.Serializable {
 					case 2 :
 						if (max > 0) {
 							if (max >= money) {
-								ctrl.act(new Action(ActionType.ALLIN,money));
+								ctrl.act(new Action(ActionType.CALL,money));
 							} else {
 								ctrl.act(new Action(ActionType.CALL,currentdiff));
 							}

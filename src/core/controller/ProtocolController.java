@@ -97,7 +97,7 @@ public class ProtocolController {
 	public void act(Action action) {
 		try {
 			action.setPlayer(self);
-			if (action.getType().equals(ActionType.RAISE) || action.getType().equals(ActionType.CALL) || action.getType().equals(ActionType.ALLIN) ) {
+			if (action.getType().equals(ActionType.RAISE) || action.getType().equals(ActionType.CALL) ) {
 				self.setMoney(self.getMoney() - action.getBet() );
                         }
                         server.act(action);
