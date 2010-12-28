@@ -37,10 +37,7 @@ public class HandTest {
 		for(Card c : cards2) {
 			System.out.println(c.getSuit() + " " + c.getValue() );
 		}
-		System.out.println(Round.getRank(cards2)) ;
-		System.out.println("------ Result ---------") ;
-		Card[] c3 = Round.getBestCards(cards1,cards2) ;
-		
+		System.out.println(Round.getRank(cards2)) ;		
 		
 	}
 }

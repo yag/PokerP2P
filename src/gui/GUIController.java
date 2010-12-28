@@ -208,7 +208,7 @@ public class GUIController implements java.io.Serializable {
 						if (allow > 2) {
 							Card river = r.getRiver() ;
 							System.out.println("River: " + river.getSuit() + " " + river.getValue() );
-							System.out.println("Ranking : " + r.getHandRank(h)) ;
+							System.out.println("Ranking : " + r.getRank(r.getCompleteHand(h))) ;
 						}
 						System.out.println("Stack : " + r.getPots().get(0).getSecond()) ;
 						System.out.println("Money : " + money) ;

@@ -105,7 +105,7 @@ public class Game implements java.io.Serializable {
 		}
 		
 		player = currentRound.getActualPlayers().get(index) ;
-		
+		if (current < 0 ) { current = 0 ; }
 		// On cherche le pari max actuel
 		int max = getCurrentMaxBet() ;
 		
@@ -114,7 +114,7 @@ public class Game implements java.io.Serializable {
 		// On prend l'action en compte
 		switch (act.getType()) {
 			case RAISE :
-				if (  ( act.getBet() + player.getSecond() ) < max) {
+				if (  ( act.getBet() + current ) <= max) { // It's not a raise, it's a call
 					throw new CheatException() ;
 				}
 				currentRound.addToPot(act.getBet()) ;
@@ -137,20 +137,10 @@ public class Game implements java.io.Serializable {
 				break ;
 				
 			case CALL :
-			if ((max-current) > money) {
-				// Allin , on cree l'ancien pot
-				List<Client> lc = new LinkedList<Client>() ;
-				for (Pair<Client,Integer> p : getCurrentRound().getActualPlayers()) {
-					lc.add(p.getFirst()) ;
-				}
-				Pair<List<Client>,Integer> new_pot = new Pair<List<Client>,Integer>(lc,0) ;
-				getCurrentRound().getPots().add(new_pot) ;
-				// on supprime le joueur jusqu'à la fin du round
-				//currentRound.getActualPlayers().remove(index) ;
-			} else {
-			// On met à jour la liste
-			player.setSecond(max) ;
-			currentRound.addToPot(max - current) ;
+			currentRound.addToPot(act.getBet()) ;
+			player.setSecond(current + act.getBet()) ;
+			if ((max-current) >= money) {
+				currentRound.closePot() ;
 			}
 			nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
 			break ;
@@ -172,8 +162,10 @@ public class Game implements java.io.Serializable {
 		} else if ((currentRound.getState() == RoundState.RIVER) && endOfSpeak()) {
 			// Le round est fini car on est à la river et tout le monde a parle
 			return null ;
+		} else if (onlyAllIn()) {
+			// We can go to the end, no one can speak anymore
+			return null ;
 		} else if ( endOfSpeak() ) {
-			System.out.println("fdfdf") ;
 			// Le round continue, on passe au tour de parole suivant
 			currentRound.setState(RoundState.values()[currentRound.getState().ordinal() + 1]) ;
 			currentRound.setCurrentPlayer(currentRound.getActualPlayers().get(0).getFirst()) ;
@@ -184,9 +176,10 @@ public class Game implements java.io.Serializable {
 			}
 			return currentRound.getActualPlayers().get(0).getFirst() ;
 		} else {
-			
+			for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
+									System.out.println(p.getSecond()) ;
+			}	
 			while (nextPlayer.getMoney() == 0 ) {
-				System.out.println(index) ;
 				nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
 			}
 			currentRound.setCurrentPlayer(nextPlayer) ;
@@ -195,8 +188,19 @@ public class Game implements java.io.Serializable {
 		}
 
 	}
-		
-	public boolean endOfSpeak() {
+
+	private boolean onlyAllIn() throws RemoteException {
+		boolean ret = true ;
+		for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
+			if (p.getFirst().getMoney() > 0) {
+				// we don't count the allin
+				ret = false ;
+			}
+		}
+		return ret ;
+	}
+
+	public boolean endOfSpeak() throws RemoteException {
 		Client dealer = currentRound.getDealer() ;
 		boolean allChecked = true ;
 		boolean allMax = true ;
@@ -215,7 +219,7 @@ public class Game implements java.io.Serializable {
 			}
 		}
 		for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
-			if (p.getSecond() != max && p.getSecond() != 0) {
+			if (p.getSecond() != max && p.getFirst().getMoney() > 0) {
 				// we don't count the allin
 				allMax = false ;
 			}

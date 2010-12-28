@@ -67,6 +67,16 @@ public class Round implements java.io.Serializable {
 		pots.get(n).setSecond( pots.get(n).getSecond() + bet) ;
 	}
 
+	public void closePot() {
+		int n = pots.size() - 1 ;
+		List<Client> lc = new LinkedList<Client>() ;
+		for (Pair<Client,Integer> p : actualPlayers) {
+					lc.add(p.getFirst()) ;
+		}
+		pots.get(n).setFirst(lc) ;
+		pots.add(new Pair<List<Client>,Integer>(null,0)) ;
+	}
+
 	public List<Pair<List<Client>,Integer>> getWinners() {
 		List<Pair<List<Client>,Integer>> win  = new LinkedList<Pair<List<Client>,Integer>>() ;
 		/* Takes no arguments : he already has the pots ! 
@@ -82,7 +92,7 @@ public class Round implements java.io.Serializable {
 			win.add(p) ;
 		} else {
 			for ( Pair<List<Client>,Integer> p : pots ) {                       
-				List<Client> winners = getPotWinners(p) ;
+				List<Client> winners = getPotWinners(p.getFirst()) ;
 				win.add(new Pair(winners,p.getSecond())) ;
 			}
 		}
@@ -90,11 +100,13 @@ public class Round implements java.io.Serializable {
 }
 
 
-public static List<Client> getPotWinners( Pair<List<Client>,Integer> pot) {
-	List<Client> winners = new LinkedList<Client>() ;
+	public static List<Client> getPotWinners (List<Client> clients)   {
+		for (Client c : clients) {
+		clients.size() ;		}
 
-	Client current_winner ;
-	for (int i = 0 ; i < pot.getFirst().size() ; i++) {
+		List<Client> winners = new LinkedList<Client>() ;
+		Client current_winner = null ;
+		for (int i = 0 ; i < clients.size() ; i++) {
 		// find the current players
 		Client p1 ;
 		Client p2 ;
@@ -105,23 +117,26 @@ public static List<Client> getPotWinners( Pair<List<Client>,Integer> pot) {
 			index += 1;
 		}*/
 		// we have at minimum 2 clients in this list :)
+		}
+		return winners;
 	}
-	return winners;
-}
 
-public static Card[] getBestCards(Card[] h1, Card[] h2) {
-	// We suppose we only compare 5 cards each ! 
-	Ranking r1 = getRank(h1) ;
-	Ranking r2 = getRank(h2) ;
+public Client getBestClient(Client c1, Client c2) {
+	// We suppose we only compare 5 cards each !
+	Card[] card1 = getCompleteHand( playersCards.get(0) ) ;
+	Card[] card2 = getCompleteHand( playersCards.get(1) ) ;
+
+	Ranking r1 = getRank(card1) ;
+	Ranking r2 = getRank(card2) ;
 
 	if (r1.ordinal() > r2.ordinal()) {
-		return h1 ;
+		return c1 ;
 	} else if (r1.ordinal() < r2.ordinal()) {
-		return h2 ;
+		return c2 ;
 	} else {
 		//Equal , we have to check each case
-		int b1 = getBestCard(h1).getValue().ordinal() ;
-		int b2 = getBestCard(h2).getValue().ordinal() ;
+		int b1 = getBestCard(card1).getValue().ordinal() ;
+		int b2 = getBestCard(card2).getValue().ordinal() ;
 
 		switch (r1) {
 
@@ -130,10 +145,10 @@ public static Card[] getBestCards(Card[] h1, Card[] h2) {
 			return null ;
 			case STRAIGHT :
 			if ( b1 > b2 ) {
-				return h1 ;
+				return c1 ;
 			} 
 			else if (b2 > b1) {
-				return h2 ;
+				return c2 ;
 			} else {
 				return null ;
 			}
@@ -212,7 +227,7 @@ public static Card[] removeBestCard(Card[] cards) {
 	return ncards ;
 }
 
-public Ranking getHandRank(Hand h) {
+public Card[] getCompleteHand(Hand h) {
 	Card[] all  = new Card[7] ;
 	all[0] = h.getCard()[0] ;
 	all[1] = h.getCard()[1] ; 
@@ -221,7 +236,7 @@ public Ranking getHandRank(Hand h) {
 	all[4] = flop[2] ; 
 	all[5] = turn ; 
 	all[6] = river ; 
-	return getRank(all) ;
+	return all ;
 }
 
 public static Ranking getRank(Card[] all) {
