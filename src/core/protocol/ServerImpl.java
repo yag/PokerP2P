@@ -84,6 +84,7 @@ abstract class ClientsIterator {
 public class ServerImpl implements Server {
 	public ServerImpl(Game currentGame) {
 		this.currentGame = currentGame;
+		currentGame.setServer(this);
 	}
 	@Override
 	public GameStatus login(String host, int port) throws RemoteException {
@@ -137,17 +138,21 @@ public class ServerImpl implements Server {
 			List<Client> players = currentGame.getPlayers();
 			final String name = client.getName();
 			System.out.println("[server] " + name + " logged out.");
+			Client nclient = null;
 			if (currentGame.getCurrentRound() != null) {
+				nclient = new FakeClient(name, client.getMoney(), client.getCurrentBet(), currentGame);
 				// Just have to replace the client with a fake
 				for (int i = 0 ; i < players.size() ; ++i) {
 					if (players.get(i).getName().equals(name)) {
-						players.set(i, new FakeClient(name, client.getMoney(), client.getCurrentBet(), currentGame));
-						return;
+						players.set(i, nclient);
 					}
 				}
+				currentGame.getCurrentRound().updatePlayer(name, nclient);
+				if (currentGame.getCurrentRound() != null && currentGame.getCurrentRound().getCurrentPlayer().getName().equals(name))
+					act(new Action(nclient, ActionType.FOLD, 0));
+			} else {
+				currentGame.removeClient(name);
 			}
-			currentGame.removeClient(name);
-			final Game game = currentGame;
 			(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 				@Override
 				protected void action(Client c) throws RemoteException {
@@ -287,16 +292,18 @@ public class ServerImpl implements Server {
 						}
 						final Client lastPlayer = lPlayer ;
 						if (count > 1) {
-							// On vire les joueurs qui n'ont plus d'argent
+							// On vire les joueurs qui n'ont plus d'argent et les fakes
 							(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 								@Override
 								protected void action(Client c) throws RemoteException {
 									if (c.getMoney() == 0 ) {
 										System.out.println("[server] " + c + "has no money, logout !") ;
 										logout(c) ;
+									} else if (c instanceof FakeClient) {
+										logout(c);
 									}
 								}
-							}).iterate(true);
+							}).iterate(false);
 							// On fait une rotation pour tourner le dealer
 							Collections.rotate(currentGame.getPlayers(),1) ;
 							beginRound() ;

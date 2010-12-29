@@ -24,8 +24,21 @@ public class ClientImpl implements Client {
 	}
 	@Override
 	public void clientLoggedOut(String name) throws RemoteException {
-		game.removeClient(name);
-		controller.clientLoggedOut(name);
+		List<Client> players = game.getPlayers();
+		Client nclient = null;
+		if (game.getCurrentRound() != null) {
+			// Just have to replace the client with a fake
+			for (int i = 0 ; i < players.size() ; ++i) {
+				if (players.get(i).getName().equals(name)) {
+					nclient = new FakeClient(name, players.get(i).getMoney(), players.get(i).getCurrentBet(), game);
+					players.set(i, nclient);
+				}
+			}
+			game.getCurrentRound().updatePlayer(name, nclient);
+		} else {
+			game.removeClient(name);
+			controller.clientLoggedOut(name);
+		}
 	}
 	@Override
 	public void clientBanned(String name) throws RemoteException {
