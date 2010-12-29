@@ -74,6 +74,9 @@ public class Round implements java.io.Serializable {
 					lc.add(p.getFirst()) ;
 		}
 		pots.get(n).setFirst(lc) ;
+	}
+	
+	public void addPot() {
 		pots.add(new Pair<List<Client>,Integer>(null,0)) ;
 	}
 
@@ -100,29 +103,28 @@ public class Round implements java.io.Serializable {
 }
 
 
-	public static List<Client> getPotWinners (List<Client> clients)   {
-		for (Client c : clients) {
-		clients.size() ;		}
+	public  List<Client> getPotWinners (List<Client> clients)   {
 
 		List<Client> winners = new LinkedList<Client>() ;
-		Client current_winner = null ;
-		for (int i = 0 ; i < clients.size() ; i++) {
-		// find the current players
-		Client p1 ;
-		Client p2 ;
-		/*for (Pair<Client,Integer> p: actualPlayers) {
-			if (p.getFirst().getName().equals(pot.getFirst().get(i))) {
-				break ;
+		
+		winners.add (clients.get(0) ) ;
+
+		for (int i = 1 ; i < clients.size() ; i++) {
+			Client new_winner = getBestClient( winners.get(0) , clients.get(i) );
+			if (new_winner	== null ) {
+				winners.add( clients.get(i)) ;
+			} else if (new_winner != winners.get(0)) {
+				// The new is better
+				winners.clear() ;
+				winners.add( clients.get(i)) ;
 			}
-			index += 1;
-		}*/
-		// we have at minimum 2 clients in this list :)
 		}
+		
 		return winners;
 	}
 
 public Client getBestClient(Client c1, Client c2) {
-	// We suppose we only compare 5 cards each !
+
 	Card[] card1 = getCompleteHand( playersCards.get(0) ) ;
 	Card[] card2 = getCompleteHand( playersCards.get(1) ) ;
 
@@ -141,25 +143,23 @@ public Client getBestClient(Client c1, Client c2) {
 		switch (r1) {
 
 			case ROYAL_FLUSH :
-			// No winners
 			return null ;
+			
+			case STRAIGHT_FLUSH :
 			case STRAIGHT :
-			if ( b1 > b2 ) {
-				return c1 ;
-			} 
-			else if (b2 > b1) {
-				return c2 ;
-			} else {
-				return null ;
-			}
 			case FOUR_OF_A_KIND :
-			//removeBestCards(h1) ;
-			break;
-
+			case FULL_HOUSE :
+			case FLUSH :
+			case THREE_OF_A_KIND:
+			case DOUBLE_PAIR:
+			case PAIR:
+			case HIGH_HAND :
+			return (b1 > b2 ? c1 : (b2 > b1 ? c2 : null ) ) ;
+			
+			default:
+			return null ;
 		}
-		return null ;
 	}
-	//return null ;
 }
 
 public static Card getBestCard(Card[] cards) {

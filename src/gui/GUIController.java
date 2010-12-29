@@ -241,10 +241,10 @@ public class GUIController implements java.io.Serializable {
 				
 				switch (choice) {
 					case 1 :
-					System.out.println("Combien tu veux RAISE ? :");
+					System.out.println("Quel est ta mise ?");
 					int bet = scan.nextInt() ;
 					if (bet > money) {
-						System.out.println("On te met ALLIN avec une mise de " + money) ;
+						System.out.println("Tu n'as pas assez d'argent, tu est donc tapis avec " + money) ;
 						ctrl.act(new Action(ActionType.RAISE,money));
 					} else {
 						ctrl.act(new Action(ActionType.RAISE,bet));

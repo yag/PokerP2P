@@ -141,6 +141,7 @@ public class Game implements java.io.Serializable {
 			player.setSecond(current + act.getBet()) ;
 			if ((max-current) >= money) {
 				currentRound.closePot() ;
+				currentRound.addPot() ;
 			}
 			nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
 			break ;
@@ -162,9 +163,6 @@ public class Game implements java.io.Serializable {
 		} else if ((currentRound.getState() == RoundState.RIVER) && endOfSpeak()) {
 			// Le round est fini car on est à la river et tout le monde a parle
 			return null ;
-		} else if (onlyAllIn()) {
-			// We can go to the end, no one can speak anymore
-			return null ;
 		} else if ( endOfSpeak() ) {
 			// Le round continue, on passe au tour de parole suivant
 			currentRound.setState(RoundState.values()[currentRound.getState().ordinal() + 1]) ;
@@ -174,7 +172,7 @@ public class Game implements java.io.Serializable {
 				//currentRound.addToPot(p.getSecond()) ;
 				p.setSecond(-1) ;
 			}
-			return currentRound.getActualPlayers().get(0).getFirst() ;
+			return ( noOneCanSpeak() ? null : currentRound.getActualPlayers().get(0).getFirst() ) ;
 		} else {
 			for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
 									System.out.println(p.getSecond()) ;
@@ -189,15 +187,20 @@ public class Game implements java.io.Serializable {
 
 	}
 
-	private boolean onlyAllIn() throws RemoteException {
-		boolean ret = true ;
+	private boolean noOneCanSpeak() throws RemoteException {
+		// Return true if they're all allin or just one client with money and all the other allin
+		int ret = 0 ;
 		for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
 			if (p.getFirst().getMoney() > 0) {
 				// we don't count the allin
-				ret = false ;
+				if (ret > 0) {
+					return false ;
+				} else {
+					ret++ ;
+				}
 			}
 		}
-		return ret ;
+		return true ;
 	}
 
 	public boolean endOfSpeak() throws RemoteException {

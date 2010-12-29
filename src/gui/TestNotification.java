@@ -9,7 +9,7 @@ public class TestNotification {
 	public NotificationListener listener = new NotificationListener() {
 		@Override
 		public void notificationPosted(Notification notification) {
-			System.out.println("[Notification]" + notification.getName() + " successfully received !");
+			//System.out.println("[Notification]" + notification.getName() + " successfully received !");
 		}
 	};
 	

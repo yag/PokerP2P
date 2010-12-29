@@ -262,6 +262,7 @@ public class ServerImpl implements Server {
 			@Override
 			protected void onEnd() throws RemoteException {
 				if (nextPlayer == null) { // On fini le round courant si necessaire
+						currentGame.getCurrentRound().closePot() ;
 						System.out.println("[server] the hand is finished") ;
 						// On donne l'argent aux gagnants
 						for (Pair<List<Client>,Integer> p : currentGame.getCurrentRound().getWinners()) {
