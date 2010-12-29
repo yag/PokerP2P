@@ -7,6 +7,7 @@ import core.protocol.Client;
 import core.protocol.Value;
 import java.util.List;
 import java.util.LinkedList;
+import java.rmi.RemoteException;
 
 public class Round implements java.io.Serializable {
 	public Round(Card f1, Card f2, Card f3, Card t, Card r, List<Hand> p) {
@@ -69,6 +70,10 @@ public class Round implements java.io.Serializable {
 
 	public void closePot() {
 		int n = pots.size() - 1 ;
+		if ( pots.get(n).getSecond() == 0 ) {
+			pots.remove(n) ;
+			return ;
+		}
 		List<Client> lc = new LinkedList<Client>() ;
 		for (Pair<Client,Integer> p : actualPlayers) {
 					lc.add(p.getFirst()) ;
@@ -124,16 +129,32 @@ public class Round implements java.io.Serializable {
 	}
 
 public Client getBestClient(Client c1, Client c2) {
+	// Find P1 and P2
+	int i1 = 0 , i2 = 0 ;
+	int index = 0 ;
+	try {
+	for (Pair<Client,Integer> p: actualPlayers) {
+			if (p.getFirst().getName().equals(c1.getName()) ) {
+				i1 = index ; 
+			} else if (p.getFirst().getName().equals(c2.getName()) ) {
+				i2 = index ;
+			}
+			index += 1;
+		}
 
-	Card[] card1 = getCompleteHand( playersCards.get(0) ) ;
-	Card[] card2 = getCompleteHand( playersCards.get(1) ) ;
+
+	Card[] card1 = getCompleteHand( playersCards.get(i1) ) ;
+	Card[] card2 = getCompleteHand( playersCards.get(i2) ) ;
 
 	Ranking r1 = getRank(card1) ;
 	Ranking r2 = getRank(card2) ;
 
 	if (r1.ordinal() > r2.ordinal()) {
+		System.out.println("La gagnant est" + c1.getName() ) ;
 		return c1 ;
 	} else if (r1.ordinal() < r2.ordinal()) {
+		System.out.println("La gagnant est" + c2.getName() ) ;
+
 		return c2 ;
 	} else {
 		//Equal , we have to check each case
@@ -160,6 +181,11 @@ public Client getBestClient(Client c1, Client c2) {
 			return null ;
 		}
 	}
+
+	} catch (RemoteException re) {
+	}
+return null ;
+
 }
 
 public static Card getBestCard(Card[] cards) {

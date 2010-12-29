@@ -193,7 +193,7 @@ public class GUIController implements java.io.Serializable {
 						Card[] c = h.getCard() ;
 						System.out.println("Card 1 : " + c[0].getSuit() + " " + c[0].getValue() );
 						System.out.println("Card 2 : " + c[1].getSuit() + " " + c[1].getValue() );
-						int allow = r.getState().ordinal() ; // it's the current state (preflop, turn ..)
+						int allow = 4 ;//r.getState().ordinal() ; // it's the current state (preflop, turn ..)
 						if (allow > 0) {
 							// On affiche les cartes du FLOPs
 							Card[] flop = r.getFlop() ;

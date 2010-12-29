@@ -278,13 +278,14 @@ public class ServerImpl implements Server {
 						}).iterate(false);
 						// Began a new hand
 						int count = 0 ;
-						Client lastPlayer = null ;
+						Client lPlayer = null ;
 						for (Client c: currentGame.getPlayers()) {
 							if (c.getMoney() > 0) {
 								count += 1;
-								lastPlayer = c ;
+								lPlayer = c ;
 							}
 						}
+						final Client lastPlayer = lPlayer ;
 						if (count > 1) {
 							// On vire les joueurs qui n'ont plus d'argent
 							(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
@@ -301,8 +302,13 @@ public class ServerImpl implements Server {
 							beginRound() ;
 						} else {
 							// La partie est fini
-							System.out.println("Ok, la partie est fini, tout le monde est ruiné sauf le grand gagnant : " + lastPlayer.getName()) ;
-							//System.exit(0) ;// TODO , c'est la VRAI FIN, avec un gagnant ! 
+							(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
+								@Override
+								protected void action(Client c) throws RemoteException {
+										System.out.println("Ok, la partie est fini, tout le monde est ruiné sauf le grand gagnant : " + lastPlayer.getName()) ;
+										logout(c) ;
+								}
+							}).iterate(true);
 						}
 
 					} else {

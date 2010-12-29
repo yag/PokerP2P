@@ -169,14 +169,10 @@ public class Game implements java.io.Serializable {
 			currentRound.setCurrentPlayer(currentRound.getActualPlayers().get(0).getFirst()) ;
 			// On remet les paris à -1 pour le tour suivant
 			for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
-				//currentRound.addToPot(p.getSecond()) ;
 				p.setSecond(-1) ;
 			}
 			return ( noOneCanSpeak() ? null : currentRound.getActualPlayers().get(0).getFirst() ) ;
 		} else {
-			for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
-									System.out.println(p.getSecond()) ;
-			}	
 			while (nextPlayer.getMoney() == 0 ) {
 				nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
 			}
