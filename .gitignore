@@ -13,3 +13,4 @@
 *.aux
 *.pdf
 *.sh
+bin/
