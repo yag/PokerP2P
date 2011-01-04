@@ -1,5 +1,8 @@
-package gui.view;
+package gui.view.components;
 
+import gui.view.IPainter;
+
+import java.awt.AlphaComposite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
@@ -11,6 +14,8 @@ public class BEPanel extends JPanel {
 	
 	public BEPanel(IPainter<BEPanel> backgroundPainter) {
 		this.backgroundPainter = backgroundPainter;
+		setOpaque(false);
+		alpha = 1.0f;
 	}
 	
 	@Override
@@ -23,5 +28,23 @@ public class BEPanel extends JPanel {
 		}
 		
 		super.paintComponent(g);
+	}
+	
+	@Override
+	public void paint(Graphics g) {
+		Graphics2D g2 = (Graphics2D)g;
+		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+		super.paint(g);
+	}
+	
+	private float alpha;
+	
+	public void setAlpha(float alpha) {
+		this.alpha = alpha;
+		repaint();
+	}
+	
+	public float getAlpha() {
+		return alpha;
 	}
 }

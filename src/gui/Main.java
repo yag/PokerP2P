@@ -1,8 +1,9 @@
 package gui;
 
+import java.util.Scanner;
+
 import core.controller.ProtocolController;
 import core.model.Game;
-import java.util.Scanner;
 
 public class Main {
 	public static void main(String[] args) {

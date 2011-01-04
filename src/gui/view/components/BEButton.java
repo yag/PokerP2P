@@ -1,4 +1,6 @@
-package gui.view;
+package gui.view.components;
+
+import gui.view.IPainter;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -46,6 +48,8 @@ public class BEButton extends JButton implements MouseListener {
 //============================================================== Mouse Listener
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		currentPainter = backgroundPainter;
+		repaint();
 	}
 
 	@Override

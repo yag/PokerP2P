@@ -1,19 +1,35 @@
 package gui;
 
+import static core.notifications.ClientNotification.clientBanned;
+import static core.notifications.ClientNotification.clientBecamePlayer;
+import static core.notifications.ClientNotification.clientBecameSpectator;
+import static core.notifications.ClientNotification.clientLoggedIn;
+import static core.notifications.ClientNotification.clientLoggedOut;
+import static core.notifications.ClientNotification.handBegan;
+import static core.notifications.ClientNotification.handEnded;
+import static core.notifications.ClientNotification.kChatAuthor;
+import static core.notifications.ClientNotification.kChatMsg;
+import static core.notifications.ClientNotification.kPlayerName;
+import static core.notifications.ClientNotification.kWinnersList;
+import static core.notifications.ClientNotification.newChatMessage;
+import static core.notifications.ClientNotification.playerActed;
 import static core.notifications.NotificationCenter.defaultCenter;
-import static core.notifications.ClientNotification.*;
-import core.controller.ProtocolController;
-import core.model.* ;
-import core.notifications.UserInfo;
-import core.protocol.Client;
-import core.protocol.ChatMessage;
-import core.protocol.Action;
-import core.protocol.Card;
-import core.protocol.ActionType;
-import core.Pair;
+
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Scanner;
+
+import core.Pair;
+import core.controller.ProtocolController;
+import core.model.Game;
+import core.model.Hand;
+import core.model.Round;
+import core.notifications.UserInfo;
+import core.protocol.Action;
+import core.protocol.ActionType;
+import core.protocol.Card;
+import core.protocol.ChatMessage;
+import core.protocol.Client;
 
 
 public class GUIController implements java.io.Serializable {

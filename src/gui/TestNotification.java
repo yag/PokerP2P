@@ -1,7 +1,12 @@
 package gui;
 
+import static core.notifications.ClientNotification.clientBecamePlayer;
+import static core.notifications.ClientNotification.clientLoggedIn;
+import static core.notifications.ClientNotification.clientLoggedOut;
+import static core.notifications.ClientNotification.handBegan;
+import static core.notifications.ClientNotification.handEnded;
+import static core.notifications.ClientNotification.playerActed;
 import static core.notifications.NotificationCenter.defaultCenter;
-import static core.notifications.ClientNotification.*;
 import core.notifications.Notification;
 import core.notifications.NotificationListener;
 

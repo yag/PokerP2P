@@ -2,7 +2,6 @@ package gui.view;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
@@ -13,7 +12,7 @@ import java.awt.image.Kernel;
 public class ShadowFactory {
 	private static ConvolveOp linearBlurOp(int size) {
 		float[] data = new float[size * size];
-		float value = 1.0f / (float) (size * size);
+		float value = 1.0f / (float) (size * size*1.5);
 		for (int i = 0; i < data.length ; ++i) {
 			data[i] = value;
 		}

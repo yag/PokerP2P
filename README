@@ -1,0 +1,15 @@
+pour compiler comme d'hab sans pitié ;)
+cd src;
+javac -cp .:lib/TimingFramework-0.55.jar -d bin/ $(find . -name '*.java');
+
+Par contre si vous compiler dans un dossier séparer il faut copié assets dans ce dossier
+
+et après dans bin par exemple
+java -cp .:../lib/TimingFramework-0.55.jar gui.MainApplication
+
+pour l'instant aucune action n'est réalisée mais vous pouvez tester les boutons pour voir les différents screens
+
+[Create > Back]
+[Join > Connect > Join]
+
+P.S: j'ai pas eu le temps de faire configuration :'(

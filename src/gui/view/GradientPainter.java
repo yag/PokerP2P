@@ -1,6 +1,5 @@
 package gui.view;
 
-import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 
 public class GradientPainter<T> implements IPainter<T> {
