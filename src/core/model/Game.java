@@ -199,13 +199,37 @@ public class Game implements java.io.Serializable {
 		return true ;
 	}
 
+        public boolean mayCheck() {
+		for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
+                        if (p.getSecond() > 0) {
+                                return false;
+                        }
+		}
+                return true;
+        }
+
+        /*
+        public int toCall(Client client) {
+                List<Pair<Client, Integer>> lp = currentRound.getActualPlayers();
+                int max = lp.get(0).getSecond();
+                for (int i = 1 ; i < lp.size() ; ++i) {
+                        if (lp.get(i).getSecond() > max) {
+                                max = lp.get(i).getSecond();
+                        }
+                }
+                if (client.getMoney() < max) {
+                        return client.getMoney();
+                }
+                return max;
+        }
+        */
+
 	public boolean endOfSpeak() throws RemoteException {
 		Client dealer = currentRound.getDealer() ;
 		boolean allChecked = true ;
 		boolean allMax = true ;
 
 		int max = 0 ;
-		// D'abord on teste si tout les joeurs présents on check .
 		for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
 			int current = p.getSecond() ;
 			if (current == -1) {

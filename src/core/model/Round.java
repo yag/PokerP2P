@@ -70,7 +70,7 @@ public class Round implements java.io.Serializable {
 
 	public void closePot() {
 		int n = pots.size() - 1 ;
-		if ( pots.get(n).getSecond() == 0 ) {
+		if ( pots.get(n).getSecond() == 0 && n >= 1) {
 			pots.remove(n) ;
 			return ;
 		}

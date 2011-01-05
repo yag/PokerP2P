@@ -11,5 +11,5 @@ public interface Server extends Remote, java.io.Serializable {
 	void postChatMessage(Client client, String text) throws RemoteException;
 	void act(Action action) throws RemoteException;
 	// Implementation specific method (not part of the protocol)
-	void disconnect() throws RemoteException;
+	void disconnect(Client self) throws RemoteException;
 }

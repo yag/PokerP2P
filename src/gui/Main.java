@@ -21,7 +21,7 @@ public class Main {
 		case 1:
 			System.out.println("Port to use?");
 			int port = scan.nextInt();
-			controller.createGame(new Game(2, 10, 100, 10, .5f), port);
+			controller.createGame(new Game(3, 10, 222, 10, .5f), port);
 			System.out.println("What is your name?");
 			String name = scan.next();
 			controller.login(selfcontroller, name, "localhost", port, port);

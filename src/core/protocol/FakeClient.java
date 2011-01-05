@@ -5,7 +5,7 @@ import core.Pair;
 import java.rmi.RemoteException;
 import java.util.List;
 
-public class FakeClient implements Client {
+public class FakeClient implements Client, java.io.Serializable {
 	public FakeClient(String name, int money, int currentBet, Game game) {
 		this.name = name;
 		this.money = money;
@@ -38,6 +38,7 @@ public class FakeClient implements Client {
 	}
 	@Override
 	public void handEnded(List<Pair<List<Client>, Integer>> winners) throws RemoteException {
+                /*
 		final Client self = this;
 		(new Thread() {
 			public void run() {
@@ -49,9 +50,11 @@ public class FakeClient implements Client {
 				}
 			}
 		}).start();
+                */
 	}
 	@Override
-	public void becomeServer() throws RemoteException {
+	public Server becomeServer() throws RemoteException {
+                return null;
 		// Nothing to do
 	}
 	@Override
@@ -99,4 +102,5 @@ public class FakeClient implements Client {
 	private int money;
 	private int currentBet;
 	private Game game;
+	private static final long serialVersionUID = 1L;
 }

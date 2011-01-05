@@ -16,7 +16,7 @@ public interface Client extends Remote, java.io.Serializable {
 	void playerActed(Action action) throws RemoteException;
 	void handBegan(Card[] flop, Card turn, Card river, List<Pair<Card, Card>> playersCards) throws RemoteException;
 	void handEnded(List<Pair<List<Client>, Integer>> winners) throws RemoteException;
-	void becomeServer() throws RemoteException;
+	Server becomeServer() throws RemoteException;
 	void newServer(Server server) throws RemoteException;
 	void play() throws RemoteException;
 	String getName() throws RemoteException;

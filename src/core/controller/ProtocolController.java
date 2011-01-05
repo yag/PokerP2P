@@ -9,7 +9,7 @@ import core.model.Game;
 import core.protocol.*;
 import gui.GUIController;
 
-public class ProtocolController {
+public class ProtocolController implements java.io.Serializable {
 	public void login(GUIController controller, String name, String serverhost, int serverport, int port) {
 		selfport = port;
 		self = new ClientImpl(controller, name, serverhost, serverport, port);
@@ -50,7 +50,7 @@ public class ProtocolController {
 			for (int i = 0 ; i < list.length ; ++i) {
 				if (list[i].equals("Server")) {
 					System.out.println("I'm the server, removing it.");
-					server.disconnect();
+					server.disconnect(self);
 					LocateRegistry.getRegistry("localhost", selfport).unbind("Server");
 					UnicastRemoteObject.unexportObject(server, false);
 					break;
@@ -122,4 +122,5 @@ public class ProtocolController {
 	private Client self;
 	private Server server;
 	private int selfport;
+        private static final long serialVersionUID = 1L;
 }

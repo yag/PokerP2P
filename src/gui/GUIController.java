@@ -202,6 +202,9 @@ public class GUIController implements java.io.Serializable {
 						}
 						
 						max = g.getCurrentMaxBet() ;
+                                                if (currentbet == -1) {
+                                                        currentbet = 0;
+                                                }
 						currentdiff = max - currentbet ;
 						Hand h = r.getPlayersCards().get(indexAll) ;
 						

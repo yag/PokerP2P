@@ -86,7 +86,7 @@ public class ClientImpl implements Client {
 		controller.handEnded(winners);
 	}
 	@Override
-	public void becomeServer() throws RemoteException {
+	public Server becomeServer() throws RemoteException {
 		System.out.println("OK, I'm the server.");
 		final Server server = new ServerImpl(game);
 		try {
@@ -95,9 +95,11 @@ public class ClientImpl implements Client {
 			final List<Client> spectatorss = game.getSpectators();
 			game.setServer(server);
 			final Game g = game;
+                        /*
 			new Thread() {
 				@Override
 				public void run() {
+                                */
 					for (Client c: players) {
 						try {
 							c.newServer(server);
@@ -112,13 +114,14 @@ public class ClientImpl implements Client {
 							e.printStackTrace();System.exit(1);
 						}
 					}
-				}
-			}.start();
+			//	}
+			//}.start();
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		} catch(java.rmi.AlreadyBoundException e) {
 			e.printStackTrace();System.exit(1);
 		}
+                return server;
 	}
 	@Override
 	public void newServer(Server server) throws RemoteException {

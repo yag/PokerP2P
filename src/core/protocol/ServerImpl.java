@@ -148,7 +148,7 @@ public class ServerImpl implements Server {
 					}
 				}
 				currentGame.getCurrentRound().updatePlayer(name, nclient);
-				if (currentGame.getCurrentRound() != null && currentGame.getCurrentRound().getCurrentPlayer().getName().equals(name))
+				if (currentGame.getCurrentRound() != null && currentGame.getCurrentRound().getCurrentPlayer() != null && currentGame.getCurrentRound().getCurrentPlayer().getName().equals(name))
 					act(new Action(nclient, ActionType.FOLD, 0));
 			} else {
 				currentGame.removeClient(name);
@@ -281,29 +281,25 @@ public class ServerImpl implements Server {
 								c.handEnded(currentGame.getCurrentRound().getWinners());
 							}
 						}).iterate(false);
+                                                currentGame.setCurrentRound(null);
 						// Began a new hand
-						int count = 0 ;
-						Client lPlayer = null ;
-						for (Client c: currentGame.getPlayers()) {
-							if (c.getMoney() > 0) {
-								count += 1;
-								lPlayer = c ;
-							}
-						}
-						final Client lastPlayer = lPlayer ;
-						if (count > 1) {
-							// On vire les joueurs qui n'ont plus d'argent et les fakes
-							(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
-								@Override
-								protected void action(Client c) throws RemoteException {
-									if (c.getMoney() == 0 ) {
-										System.out.println("[server] " + c + "has no money, logout !") ;
-										logout(c) ;
-									} else if (c instanceof FakeClient) {
-										logout(c);
-									}
-								}
-							}).iterate(false);
+                                                // On vire les joueurs qui n'ont plus d'argent et les fakes
+                                                final List<Client> tologout = new LinkedList<Client>();
+                                                (new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
+                                                        @Override
+                                                        protected void action(Client c) throws RemoteException {
+                                                                if (c.getMoney() == 0 ) {
+                                                                        System.out.println("[server] " + c + "has no money, logout !") ;
+                                                                        tologout.add(c);
+                                                                } else if (c instanceof FakeClient) {
+                                                                        tologout.add(c);
+                                                                }
+                                                        }
+                                                }).iterate(false);
+                                                for (Client c: tologout) {
+                                                        logout(c);
+                                                }
+						if (currentGame.getPlayers().size() > 1) {
 							// On fait une rotation pour tourner le dealer
 							Collections.rotate(currentGame.getPlayers(),1) ;
 							beginRound() ;
@@ -312,10 +308,10 @@ public class ServerImpl implements Server {
 							(new ClientsIterator(currentGame.getPlayers(), currentGame.getSpectators()) {
 								@Override
 								protected void action(Client c) throws RemoteException {
-										System.out.println("Ok, la partie est fini, tout le monde est ruiné sauf le grand gagnant : " + lastPlayer.getName()) ;
+										System.out.println("Ok, la partie est fini, tout le monde est ruiné sauf le grand gagnant : " + currentGame.getPlayers().get(0).getName());
 										logout(c) ;
 								}
-							}).iterate(true);
+							}).iterate(false);
 						}
 
 					} else {
@@ -384,15 +380,16 @@ public class ServerImpl implements Server {
 			}
 		}).start();
 	}
-	public void disconnect() throws RemoteException {
+	public void disconnect(Client self) throws RemoteException {
 		int index;
 		List<Client> players = currentGame.getPlayers();
 		if (players.size() == 0) {
 			System.out.println("There's nobody else.");
 			return;
 		}
-		final Client next = players.get(0);
+		final Client next = players.get(players.size()-1);
 		System.out.println("[server] disconnecting, asking to " + next.getName() + " to become server");
+                final Client s = self;
 		new Thread() {
 			@Override
 			public void run() {
