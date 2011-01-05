@@ -4,6 +4,5 @@ public enum ActionType {
 	FOLD,
 	CALL,
 	RAISE,
-	CHECK,
-	SITOUT
+	CHECK
 }

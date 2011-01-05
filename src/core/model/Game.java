@@ -114,16 +114,18 @@ public class Game implements java.io.Serializable {
 		// On prend l'action en compte
 		switch (act.getType()) {
 			case RAISE :
-				if (  ( act.getBet() + current ) <= max) { // It's not a raise, it's a call
+				if (  ( act.getBet() + current ) > money) { // It's not a raise, it's a call
 					throw new CheatException() ;
 				}
-				currentRound.addToPot(act.getBet()) ;
+				//currentRound.addToPot(act.getBet()) ;
 				player.setSecond(act.getBet() + current) ; // on ajoute
 				nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
 				break ;
 				
 			case FOLD :
+                                currentRound.foldedPot.add(current);
 				currentRound.getActualPlayers().remove(index) ;
+                                player.getFirst().setMoney(player.getFirst().getMoney() - current);
 				nextPlayer = currentRound.getActualPlayers().get((index)%currentRound.getActualPlayers().size()).getFirst() ;
 				break ;
 					
@@ -131,25 +133,25 @@ public class Game implements java.io.Serializable {
 			 	// pour checker, il faut que tous les joueurs ait checké (ou n'est pas encore parlé)
 				if (max >  0 || player.getSecond() > -1 ) {
 					throw new CheatException() ;
-                }
+                                }
 				player.setSecond(0) ;
 				nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
 				break ;
 				
 			case CALL :
-			currentRound.addToPot(act.getBet()) ;
-			player.setSecond(current + act.getBet()) ;
-			if ((max-current) >= money) {
-				currentRound.closePot() ;
-				currentRound.addPot() ;
-			}
-			nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
-			break ;
-			
-			case SITOUT :
-				currentRound.getActualPlayers().remove(index) ;
-				nextPlayer = currentRound.getActualPlayers().get((index)%currentRound.getActualPlayers().size()).getFirst() ;
-				break ;	
+                                //currentRound.addToPot(act.getBet()) ;
+				if (  ( act.getBet() + current ) > money) { // It's not a raise, it's a call
+					throw new CheatException() ;
+				}
+                                player.setSecond(current + act.getBet()) ;
+                                /*
+                                if ((max-current) >= money) {
+                                        currentRound.closePot() ;
+                                        currentRound.addPot() ;
+                                }
+                                */
+                                nextPlayer = currentRound.getActualPlayers().get((++index)%currentRound.getActualPlayers().size()).getFirst() ;
+                                break ;
 		}
 
 		/* y'a t'il un joueur suivant qui doit parler ?
@@ -159,9 +161,17 @@ public class Game implements java.io.Serializable {
 		
 		if (currentRound.getActualPlayers().size() <= 1) {
 			// Le round est fini car il n'ya plus q'un joueur, il y a un gagnant
+                        List<Pair<Client, Integer>> copy = new LinkedList<Pair<Client, Integer>>();
+                        for (Pair<Client, Integer> p : currentRound.getActualPlayers())
+                                copy.add(new Pair<Client, Integer> (p.getFirst(), p.getSecond())) ;
+                        separatePot(copy);
 			return  null ;
 		} else if ((currentRound.getState() == RoundState.RIVER) && endOfSpeak()) {
 			// Le round est fini car on est à la river et tout le monde a parle
+                        List<Pair<Client, Integer>> copy = new LinkedList<Pair<Client, Integer>>();
+                        for (Pair<Client, Integer> p : currentRound.getActualPlayers())
+                                copy.add(new Pair<Client, Integer> (p.getFirst(), p.getSecond())) ;
+                        separatePot(copy);
 			return null ;
 		} else if ( endOfSpeak() ) {
 			// Le round continue, on passe au tour de parole suivant
@@ -182,6 +192,49 @@ public class Game implements java.io.Serializable {
 		}
 
 	}
+
+        private void separatePot(List<Pair<Client, Integer>> actualPlayers) {
+                boolean fini = true ;
+                for (int i = 0 ; i < actualPlayers.size () && fini ; ++i)
+                        if (actualPlayers.get(i).getSecond() > 0)
+                                fini = false ;
+                if (fini)
+                        return ;
+                int min = actualPlayers.get(0).getSecond() ;
+                int minidx = 0 ;
+                for (int i = 0 ; i < actualPlayers.size() ; ++i) {
+                        if (actualPlayers.get(i).getSecond() < min) {
+                                min = actualPlayers.get(i).getSecond() ;
+                                minidx = i ;
+                        }
+                }
+		List<Client> lc = new LinkedList<Client>() ;
+		for (Pair<Client,Integer> p : actualPlayers) {
+                        lc.add(p.getFirst()) ;
+		}
+                Pair<List<Client>, Integer> pot = new Pair<List<Client>, Integer> (lc, min * actualPlayers.size());
+                currentRound.getPots().add(pot);
+                for (int i = 0 ; i < actualPlayers.size() ;) {
+                        int n = actualPlayers.get(i).getSecond() - min ;
+                        if (n == 0)
+                                actualPlayers.remove(i);
+                        else
+                                actualPlayers.get(i++).setSecond(n);
+                }
+                for (int i = 0 ; i < currentRound.foldedPot.size() ;) {
+                        int n = currentRound.foldedPot.get(i) ;
+                        if (n > min) {
+                                n -= min ;
+                                pot.setSecond(pot.getSecond() + min);
+                                currentRound.foldedPot.set(i++, n);
+                        } else {
+                                pot.setSecond(pot.getSecond() + n);
+                                n = 0;
+                                currentRound.foldedPot.remove(i);
+                        }
+                }
+                separatePot(actualPlayers);
+        }
 
 	private boolean noOneCanSpeak() throws RemoteException {
 		// Return true if they're all allin or just one client with money and all the other allin

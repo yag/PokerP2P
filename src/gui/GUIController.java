@@ -119,8 +119,6 @@ public class GUIController implements java.io.Serializable {
 				break ;
 				case FOLD : System.out.println("folded") ;
 				break ;
-				case SITOUT : System.out.println("is sitout") ;
-				break ;
 			}
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
@@ -180,7 +178,7 @@ public class GUIController implements java.io.Serializable {
 				int indexAll = 0 ;
 				int money = controller.getClient().getMoney() ;
 				
-				while (choice < 1 || choice > 5) {
+				while (choice < 1 || choice > 4) {
 						//final String ESC = "\033[";
 						//System.out.print(ESC + "2J"); System.out.flush();
 						Game g = controller.getClient().getGame() ;
@@ -248,8 +246,7 @@ public class GUIController implements java.io.Serializable {
 							System.out.println("2 = Check");
 						}
 						System.out.println("3 = Fold") ;
-						//System.out.println("4 = Sitout") ;
-						System.out.println("5 = Logout") ;
+						System.out.println("4 = Logout") ;
 						System.out.println("--------------------------------------") ;
 						choice = scan.nextInt();
 					} else {
@@ -284,9 +281,6 @@ public class GUIController implements java.io.Serializable {
 					ctrl.act(new Action(ActionType.FOLD));
 					break ;
 					case 4 :
-					ctrl.act(new Action(ActionType.SITOUT));
-					break ;
-					case 5 :
 					controller.logout() ;
 					break ;
 					default : // never happens

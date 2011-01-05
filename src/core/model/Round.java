@@ -150,10 +150,10 @@ public class Round implements java.io.Serializable {
 		Ranking r2 = getRank(card2) ;
 
 		if (r1.ordinal() > r2.ordinal()) {
-			System.out.println("La gagnant est" + c1.getName() ) ;
+			//System.out.println("La gagnant est " + c1.getName() ) ;
 			return c1 ;
 		} else if (r1.ordinal() < r2.ordinal()) {
-			System.out.println("La gagnant est" + c2.getName() ) ;
+			//System.out.println("La gagnant est " + c2.getName() ) ;
 
 			return c2 ;
 		} else {
@@ -382,5 +382,6 @@ public class Round implements java.io.Serializable {
 	private RoundState state = RoundState.PREFLOP;
 	// a list of the differents pots with for each, players in it and money
 	private List<Pair<List<Client>,Integer>> pots = new LinkedList<Pair<List<Client>,Integer>>();
+        public List<Integer> foldedPot = new LinkedList<Integer>();
 	private static final long serialVersionUID = 1L;
 }

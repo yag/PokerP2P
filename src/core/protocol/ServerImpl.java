@@ -269,6 +269,11 @@ public class ServerImpl implements Server {
 				if (nextPlayer == null) { // On fini le round courant si necessaire
 						currentGame.getCurrentRound().closePot() ;
 						System.out.println("[server] the hand is finished") ;
+                                                for (Pair<List<Client>,Integer> p : nextRound.getPots()) {
+                                                        for (Client c : p.getFirst()) {
+                                                                c.setMoney(c.getMoney() - p.getSecond() / p.getFirst().size()) ;
+                                                        }
+                                                }
 						// On donne l'argent aux gagnants
 						for (Pair<List<Client>,Integer> p : currentGame.getCurrentRound().getWinners()) {
 							for (Client cl : p.getFirst()) {

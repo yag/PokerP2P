@@ -78,6 +78,7 @@ public class ClientImpl implements Client {
 		}
 		game.setCurrentRound(new Round(flop[0], flop[1], flop[2], turn, river, hands));
 		game.handBegan();
+                java.util.Collections.rotate(game.getPlayers(),1) ;
 		controller.handBegan();
 	}
 	@Override
