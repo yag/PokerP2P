@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.rmi.RemoteException;
 
+
 public class Round implements java.io.Serializable {
 	public Round(Card f1, Card f2, Card f3, Card t, Card r, List<Hand> p) {
 		flop[0] = f1;
@@ -18,7 +19,7 @@ public class Round implements java.io.Serializable {
 		river = r;
 		playersCards = p;
 		actualPlayers = null ; 
-		pots.add(new Pair<List<Client>,Integer>(null,0)) ;
+		//pots.add(new Pair<List<Client>,Integer>(null,0)) ;
 
 	}
 	public Card[] getFlop() {
@@ -63,14 +64,14 @@ public class Round implements java.io.Serializable {
 	public void setPots(List<Pair<List<Client>,Integer>> pots) {
 		this.pots = pots;
 	}
-	public void addToPot(int bet) {
-		int n = pots.size() - 1 ;
-		pots.get(n).setSecond( pots.get(n).getSecond() + bet) ;
-	}
+	//public void addToPot(int bet) {
+	//	int n = pots.size() - 1 ;
+	//	pots.get(n).setSecond( pots.get(n).getSecond() + bet) ;
+	//}
 
 	public void closePot() {
 		int n = pots.size() - 1 ;
-		if ( pots.get(n).getSecond() == 0 && n >= 1) {
+		if ( pots.get(n).getSecond() == 0 ) {
 			pots.remove(n) ;
 			return ;
 		}
@@ -81,9 +82,9 @@ public class Round implements java.io.Serializable {
 		pots.get(n).setFirst(lc) ;
 	}
 	
-	public void addPot() {
-		pots.add(new Pair<List<Client>,Integer>(null,0)) ;
-	}
+	//public void addPot() {
+	//	pots.add(new Pair<List<Client>,Integer>(null,0)) ;
+	//}
 
 	public List<Pair<List<Client>,Integer>> getWinners() {
 		List<Pair<List<Client>,Integer>> win  = new LinkedList<Pair<List<Client>,Integer>>() ;
@@ -124,8 +125,8 @@ public class Round implements java.io.Serializable {
 				winners.add( clients.get(i)) ;
 			}
 		}
-		
-		return winners;
+		return null ;
+		//return winners;
 	}
 
 	public Client getBestClient(Client c1, Client c2) {
@@ -150,36 +151,186 @@ public class Round implements java.io.Serializable {
 		Ranking r2 = getRank(card2) ;
 
 		if (r1.ordinal() > r2.ordinal()) {
-			//System.out.println("La gagnant est " + c1.getName() ) ;
+			System.out.println("La gagnant est" + c1.getName() ) ;
 			return c1 ;
 		} else if (r1.ordinal() < r2.ordinal()) {
-			//System.out.println("La gagnant est " + c2.getName() ) ;
-
+			System.out.println("La gagnant est" + c2.getName() ) ;
 			return c2 ;
 		} else {
 			//Equal , we have to check each case
-			int b1 = getBestCard(card1).getValue().ordinal() ;
-			int b2 = getBestCard(card2).getValue().ordinal() ;
-
+			int b1 = 0;
+			int b2 = 0;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			switch (r1) {
 
 				case ROYAL_FLUSH :
-				return null ;
+					return null ;
 				
 				case STRAIGHT_FLUSH :
+					// FIXME:TO DO
+					//
+                                        break;
+										
 				case STRAIGHT :
+					// FIXME:TO DO
+					//
+                                        break;
+					
 				case FOUR_OF_A_KIND :
+					int nb1 = 0;
+					int nb2 = 0;
+					for (int i=0 ; i<4 ; i++){
+						nb1 = 0;
+						nb2 = 0;
+						for (int j = i ;  j<7 ; j++){
+							// match card[i] with others cards
+							if (card1[i].getValue().ordinal()==card1[j].getValue().ordinal())
+								nb1++;
+							if (card2[i].getValue().ordinal()==card2[j].getValue().ordinal())
+								nb2++;
+						}
+						if (nb1==3)
+							b1 = card1[i].getValue().ordinal();
+						if (nb2==3){
+							b2 = card2[i].getValue().ordinal();
+						}
+					}
+					if (b1 == b2){
+						// voir kicker
+						b1 = bestButNot(card1, b1);
+						b2 = bestButNot(card2, b2);
+					}
+                                        break;
+					
 				case FULL_HOUSE :
+					// search triplets
+					b1 = searchTriplet(card1);
+					b2 = searchTriplet(card2);
+					// search pairs not in triplets
+					if (b1==b2){
+						b1 = searchPairNotInTriplet(card1, b1);
+						b2 = searchPairNotInTriplet(card2, b2);
+						if (b1 == b2)
+							return null;
+					}
+                                        break;
+					
 				case FLUSH :
+					// FIXME:TO DO
+                                        break;
+					
 				case THREE_OF_A_KIND:
+					// search triplets
+					b1 = searchTriplet(card1);
+					b2 = searchTriplet(card2);
+					if (b1 == b2){
+						// voir kicker1
+						int b11 = bestButNot(card1, b1);
+						int b21 = bestButNot(card2, b2);
+						if (b11 == b21){
+							// voir kicker2
+							b1 = bestButNot(card1, b1, b11);
+							b2 = bestButNot(card2, b2, b21);
+							
+						} else {
+							b1 = b11;
+							b2 = b21;
+						}
+					}
+                                        break;
+					
 				case DOUBLE_PAIR:
+					// search 1st pairs
+					b1 = searchPairNotInTriplet(card1, 0);
+					b2 = searchPairNotInTriplet(card2, 0);
+					if (b1 == b2){
+						int b11 = searchPairNotInTriplet(card1, b1);
+						int b21 = searchPairNotInTriplet(card2, b2);
+						if (b11 == b21){
+							// voir kicker
+							b1 = bestButNot(card1, b1, b11);
+							b2 = bestButNot(card2, b2, b21);
+						} else {
+							b1 = b11;
+							b2 = b21;
+						}
+					}
+                                        break;
+					
 				case PAIR:
+					// search pairs
+					b1 = searchPairNotInTriplet(card1, 0);
+					b2 = searchPairNotInTriplet(card2, 0);
+					if (b1 == b2){
+						// voir kicker1
+						int b11 = bestButNot(card1, b1);
+						int b21 = bestButNot(card2, b2);
+						if (b11 == b21){
+							// voir kicker2
+							int b12 = bestButNot(card1, b1, b11);
+							int b22 = bestButNot(card2, b2, b21);
+							if (b12 == b22){
+								// voir kicker3
+								b1 = bestButNot(card1, b1, b11, b12);
+								b2 = bestButNot(card2, b2, b21, b22);
+								
+							} else {
+								b1 = b12;
+								b2 = b22;
+							}
+						} else {
+							b1 = b11;
+							b2 = b21;
+						}
+					}
+                                        break;
+					
 				case HIGH_HAND :
-				return (b1 > b2 ? c1 : (b2 > b1 ? c2 : null ) ) ;
+					b1 = getBestCard(card1).getValue().ordinal() ;
+					b2 = getBestCard(card2).getValue().ordinal() ;
+					if (b1 == b2){
+						// voir kicker1
+						int b11 = bestButNot(card1, b1);
+						int b21 = bestButNot(card2, b2);
+						if (b11 == b21){
+							// voir kicker2
+							int b12 = bestButNot(card1, b1, b11);
+							int b22 = bestButNot(card2, b2, b21);
+							if (b12 == b22){
+								// voir kicker3
+								int b13 = bestButNot(card1, b1, b11, b12, b12);
+								int b23 = bestButNot(card2, b2, b21, b22, b22);
+								if (b13 == b23){
+									// voir kicker4
+									b1 = bestButNot(card1, b1, b11, b12, b13);
+									b2 = bestButNot(card2, b2, b21, b22, b23);
+									
+								} else {
+									b1 = b13;
+									b2 = b23;
+								}
+								
+							} else {
+								b1 = b12;
+								b2 = b22;
+							}
+						} else {
+							b1 = b11;
+							b2 = b21;
+						}
+					}
+                                        break;
 				
 				default:
 				return null ;
-			}
+			} // end of switch
+			if (b1>b2){
+				System.out.println("La gagnant est" + c1.getName() ) ;
+				return c1;
+			} else if (b2>b1){
+				System.out.println("La gagnant est" + c2.getName() ) ;
+				return c2;	
+			} else return null;
 		}
 
 		} catch (RemoteException re) {
@@ -187,6 +338,86 @@ public class Round implements java.io.Serializable {
 		return null ;
 
 	}
+	private int searchTriplet(Card set[]){
+		int nb = 0;
+		int b = 0;
+		for (int i=0 ; i<5 ; i++){
+			nb = 0;
+			for (int j = i ;  j<7 ; j++){
+				// match card[i] with others cards
+				if (set[i].getValue().ordinal()==set[j].getValue().ordinal())
+					nb++;
+			}
+			if (nb==2){
+				b = Math.max(set[i].getValue().ordinal() , b );
+			}
+		}
+		return b;
+	}
+	private int searchPairNotInTriplet(Card set[], int forbidden){
+		int nb = 0;
+		int b = 0;
+		for (int i=0 ; i<6 ; i++){
+			nb = 0;
+			for (int j = i ;  j<7 ; j++){
+				// match card[i] with others cards
+				if ( set[i].getValue().ordinal()!=forbidden&& set[i].getValue().ordinal()==set[j].getValue().ordinal() )
+					nb++;
+			}
+			if (nb==1 ){
+				b = Math.max(set[i].getValue().ordinal() , b );
+			}
+		}
+		return b;
+	}
+	private int bestButNot(Card set [], int forbidden){
+		int max = 0;
+		int v;
+		for (int i=0 ; i<7 ; i++){
+			v = set[i].getValue().ordinal();
+			if (v != forbidden){
+				max = Math.max(max, v);
+			}
+		}
+		return max;
+	}
+	private int bestButNot(Card set [], int forbidden1, int forbidden2){
+		int max = 0;
+		int v;
+		for (int i=0 ; i<7 ; i++){
+			v = set[i].getValue().ordinal();
+			if (v != forbidden1 && v != forbidden2 ){
+				max = Math.max(max, v);
+			}
+		}
+		return max;
+		
+	}
+	private int bestButNot(Card set [], int forbidden1, int forbidden2, int forbidden3){
+		int max = 0;
+		int v;
+		for (int i=0 ; i<7 ; i++){
+			v = set[i].getValue().ordinal();
+			if (v != forbidden1 && v != forbidden2 && v != forbidden3 ){
+				max = Math.max(max, v);
+			}
+		}
+		return max;
+		
+	}
+	private int bestButNot(Card set [], int forbidden1, int forbidden2, int forbidden3, int forbidden4){
+		int max = 0;
+		int v;
+		for (int i=0 ; i<7 ; i++){
+			v = set[i].getValue().ordinal();
+			if (v != forbidden1 && v != forbidden2 && v != forbidden3 && v != forbidden4 ){
+				max = Math.max(max, v);
+			}
+		}
+		return max;
+		
+	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Card getBestCard(Card[] cards) {
 		Card best = cards[0] ; 
@@ -372,6 +603,17 @@ public class Round implements java.io.Serializable {
 		}
 	}
 
+        public int getCurrentPot() {
+                int val = 0 ;
+                for (Pair<Client,Integer> p : actualPlayers ) {
+                        int i = p.getSecond() ;
+                        if (i > 0)
+                                val += i ;
+                }
+
+                return val ; 
+        }
+
 	private Card[] flop = new Card[3];
 	private Card turn;
 	private Card river;
@@ -381,7 +623,7 @@ public class Round implements java.io.Serializable {
 	private Client dealer;
 	private RoundState state = RoundState.PREFLOP;
 	// a list of the differents pots with for each, players in it and money
+        public List<Integer> foldedPot = new LinkedList<Integer> ();
 	private List<Pair<List<Client>,Integer>> pots = new LinkedList<Pair<List<Client>,Integer>>();
-        public List<Integer> foldedPot = new LinkedList<Integer>();
 	private static final long serialVersionUID = 1L;
 }

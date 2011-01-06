@@ -178,6 +178,7 @@ public class GUIController implements java.io.Serializable {
 				int indexAll = 0 ;
 				int money = controller.getClient().getMoney() ;
 				
+				
 				while (choice < 1 || choice > 4) {
 						//final String ESC = "\033[";
 						//System.out.print(ESC + "2J"); System.out.flush();
@@ -206,11 +207,18 @@ public class GUIController implements java.io.Serializable {
 						currentdiff = max - currentbet ;
 						Hand h = r.getPlayersCards().get(indexAll) ;
 						
+					////
+					System.out.print("[game]");
+					for (Pair<Client, Integer> p : r.getActualPlayers())
+                        System.out.print(" " + p.getFirst().getName() + " " + p.getSecond()) ;
+					System.out.println("");
+					
 						System.out.println("------------ You're turn --------------") ;
 						Card[] c = h.getCard() ;
 						System.out.println("Card 1 : " + c[0].getSuit() + " " + c[0].getValue() );
 						System.out.println("Card 2 : " + c[1].getSuit() + " " + c[1].getValue() );
-						int allow = 4 ;//r.getState().ordinal() ; // it's the current state (preflop, turn ..)
+						//int allow = 4 ;
+						int allow = r.getState().ordinal() ; // it's the current state (preflop, turn ..)
 						if (allow > 0) {
 							// On affiche les cartes du FLOPs
 							Card[] flop = r.getFlop() ;
@@ -227,7 +235,7 @@ public class GUIController implements java.io.Serializable {
 							System.out.println("River: " + river.getSuit() + " " + river.getValue() );
 							System.out.println("Ranking : " + r.getRank(r.getCompleteHand(h))) ;
 						}
-						System.out.println("Stack : " + r.getPots().get(0).getSecond()) ;
+						System.out.println("Current pot : " + r.getCurrentPot() ) ;
 						System.out.println("Money : " + money) ;
 
 					if (currentbet != -1) {

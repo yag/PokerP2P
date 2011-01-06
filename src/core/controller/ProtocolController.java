@@ -97,12 +97,10 @@ public class ProtocolController implements java.io.Serializable {
 	public void act(Action action) {
 		try {
 			action.setPlayer(self);
-                        /*
+                        server.act(action);
 			if (action.getType().equals(ActionType.RAISE) || action.getType().equals(ActionType.CALL) ) {
 				self.setMoney(self.getMoney() - action.getBet() );
                         }
-                        */
-                        server.act(action);
 		} catch (RemoteException e) {
 			e.printStackTrace();System.exit(1);
 		}

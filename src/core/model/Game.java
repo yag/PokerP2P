@@ -111,6 +111,7 @@ public class Game implements java.io.Serializable {
 		
 		// on initilise le joueur suivant
 		Client nextPlayer = null ;
+
 		// On prend l'action en compte
 		switch (act.getType()) {
 			case RAISE :
@@ -125,12 +126,11 @@ public class Game implements java.io.Serializable {
 			case FOLD :
                                 currentRound.foldedPot.add(current);
 				currentRound.getActualPlayers().remove(index) ;
-                                player.getFirst().setMoney(player.getFirst().getMoney() - current);
 				nextPlayer = currentRound.getActualPlayers().get((index)%currentRound.getActualPlayers().size()).getFirst() ;
 				break ;
 					
 			case CHECK :
-			 	// pour checker, il faut que tous les joueurs ait checké (ou n'est pas encore parlé)
+			 	// pour checker, il faut que tous les joueurs ait checké (ou n'aient pas encore parlé)
 				if (max >  0 || player.getSecond() > -1 ) {
 					throw new CheatException() ;
                                 }
@@ -176,6 +176,10 @@ public class Game implements java.io.Serializable {
 		} else if ( endOfSpeak() ) {
 			// Le round continue, on passe au tour de parole suivant
 			currentRound.setState(RoundState.values()[currentRound.getState().ordinal() + 1]) ;
+                        List<Pair<Client, Integer>> copy = new LinkedList<Pair<Client, Integer>>();
+                        for (Pair<Client, Integer> p : currentRound.getActualPlayers())
+                                copy.add(new Pair<Client, Integer> (p.getFirst(), p.getSecond())) ;
+                        separatePot(copy);
 			currentRound.setCurrentPlayer(currentRound.getActualPlayers().get(0).getFirst()) ;
 			// On remet les paris à -1 pour le tour suivant
 			for (Pair<Client,Integer> p : currentRound.getActualPlayers()) {
